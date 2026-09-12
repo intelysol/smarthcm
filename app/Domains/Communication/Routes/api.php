@@ -1,0 +1,3 @@
+<?php
+use App\Domains\Communication\Http\Controllers\CommunicationController; use Illuminate\Support\Facades\Route;
+Route::prefix('v1/communications')->middleware(['web','auth','tenant'])->group(function():void{Route::get('templates',[CommunicationController::class,'templates']);Route::post('templates',[CommunicationController::class,'createTemplate']);Route::post('send',[CommunicationController::class,'send']);Route::get('inbox',[CommunicationController::class,'inbox']);Route::put('preferences',[CommunicationController::class,'preference']);Route::post('deliveries/{delivery}/track',[CommunicationController::class,'track']);});

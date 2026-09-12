@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Domains\EmployeeAi\Enums;
+
+enum ConciergeActionType: string
+{
+    case SUBMIT_LEAVE_REQUEST = 'SUBMIT_LEAVE_REQUEST';
+    case SUBMIT_ATTENDANCE_CORRECTION = 'SUBMIT_ATTENDANCE_CORRECTION';
+    case CREATE_HR_REQUEST = 'CREATE_HR_REQUEST';
+    case SUBMIT_EXPENSE = 'SUBMIT_EXPENSE';
+    case REQUEST_DOCUMENT = 'REQUEST_DOCUMENT';
+}

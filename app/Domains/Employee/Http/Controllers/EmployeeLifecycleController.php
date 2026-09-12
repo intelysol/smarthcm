@@ -1,0 +1,4 @@
+<?php
+namespace App\Domains\Employee\Http\Controllers;
+use App\Domains\Employee\Models\Employee; use App\Domains\Employee\Services\EmployeeLifecycleService; use App\Domains\Platform\Contracts\TenantContext; use Illuminate\Http\{JsonResponse,Request};
+class EmployeeLifecycleController { public function __construct(private readonly EmployeeLifecycleService $lifecycle,private readonly TenantContext $tenant){} public function __invoke(Request $request,string $employee):JsonResponse{$request->user()->hasPermission('employee.update')||abort(403);$model=Employee::query()->where('tenant_id',$this->tenant->id())->findOrFail($employee);$status=$request->validate(['employment_status'=>['required','in:draft,pending_approval,active,on_leave,suspended,resigned,terminated,archived']])['employment_status'];return response()->json(['data'=>$this->lifecycle->transition($model,$status)]);}}

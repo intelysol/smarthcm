@@ -1,0 +1,3 @@
+<?php
+use App\Domains\Operations\Http\Controllers\OperationsController; use Illuminate\Support\Facades\Route;
+Route::prefix('v1/operations')->middleware(['web','auth','tenant'])->group(function():void { Route::get('dashboard',[OperationsController::class,'dashboard']); Route::post('metrics',[OperationsController::class,'metric']); Route::get('alert-rules',[OperationsController::class,'rules']); Route::post('alert-rules',[OperationsController::class,'createRule']); Route::post('alerts/evaluate',[OperationsController::class,'evaluate']); Route::get('incidents',[OperationsController::class,'incidents']); Route::post('incidents',[OperationsController::class,'createIncident']); Route::post('incidents/{incident}/resolve',[OperationsController::class,'resolve']); });

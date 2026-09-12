@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Domains\Engagement\Events;
+
+use App\Domains\Engagement\Models\EngagementActionItem;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class EngagementActionItemCompleted
+{
+    use Dispatchable, SerializesModels;
+    public function __construct(public EngagementActionItem $actionItem) {}
+}

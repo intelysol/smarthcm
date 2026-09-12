@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Domains\Learning\Events;
+
+use App\Domains\Learning\Models\LearningCertificate;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class LearningCertificateIssued
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(public readonly LearningCertificate $certificate) {}
+}

@@ -1,0 +1,17 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('document_categories', function (Blueprint $t) { $t->uuid('id')->primary(); $t->uuid('tenant_id')->index(); $t->string('name'); $t->json('allowed_mime_types')->nullable(); $t->timestamps(); $t->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete(); $t->unique(['tenant_id','name']); });
+        Schema::create('document_folders', function (Blueprint $t) { $t->uuid('id')->primary(); $t->uuid('tenant_id')->index(); $t->uuid('parent_id')->nullable(); $t->string('name'); $t->string('scope_type',40)->nullable(); $t->string('scope_id',80)->nullable(); $t->timestamps(); $t->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete(); $t->foreign('parent_id')->references('id')->on('document_folders')->cascadeOnDelete(); });
+        Schema::create('documents', function (Blueprint $t) { $t->uuid('id')->primary(); $t->uuid('tenant_id')->index(); $t->uuid('category_id')->nullable(); $t->uuid('folder_id')->nullable(); $t->string('title'); $t->text('description')->nullable(); $t->json('tags')->nullable(); $t->date('expires_at')->nullable(); $t->string('retention_policy')->nullable(); $t->foreignId('owner_id')->nullable()->constrained('users')->nullOnDelete(); $t->timestamps(); $t->softDeletes(); $t->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete(); $t->foreign('category_id')->references('id')->on('document_categories')->nullOnDelete(); $t->foreign('folder_id')->references('id')->on('document_folders')->nullOnDelete(); });
+        Schema::create('document_versions', function (Blueprint $t) { $t->uuid('id')->primary(); $t->uuid('document_id')->index(); $t->unsignedInteger('version'); $t->string('storage_disk',40); $t->string('storage_path'); $t->string('original_name'); $t->string('mime_type',120); $t->unsignedBigInteger('size'); $t->string('checksum',128)->nullable(); $t->text('change_notes')->nullable(); $t->json('metadata')->nullable(); $t->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete(); $t->timestamps(); $t->foreign('document_id')->references('id')->on('documents')->cascadeOnDelete(); $t->unique(['document_id','version']); });
+        Schema::create('document_links', function (Blueprint $t) { $t->uuid('document_id'); $t->string('linkable_type',120); $t->string('linkable_id',80); $t->timestamps(); $t->primary(['document_id','linkable_type','linkable_id']); $t->foreign('document_id')->references('id')->on('documents')->cascadeOnDelete(); });
+        Schema::create('document_audits', function (Blueprint $t) { $t->uuid('id')->primary(); $t->uuid('document_id')->index(); $t->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); $t->string('action',30); $t->json('metadata')->nullable(); $t->string('ip_address',45)->nullable(); $t->timestamp('occurred_at'); $t->timestamps(); $t->foreign('document_id')->references('id')->on('documents')->cascadeOnDelete(); });
+    }
+    public function down(): void { Schema::dropIfExists('document_audits'); Schema::dropIfExists('document_links'); Schema::dropIfExists('document_versions'); Schema::dropIfExists('documents'); Schema::dropIfExists('document_folders'); Schema::dropIfExists('document_categories'); }
+};

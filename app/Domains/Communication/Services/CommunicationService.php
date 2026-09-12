@@ -1,0 +1,4 @@
+<?php
+namespace App\Domains\Communication\Services;
+use App\Domains\Communication\Models\{CommunicationDelivery,CommunicationTemplate};
+class CommunicationService { public function render(string $body,array $variables):string{return preg_replace_callback('/\\{\\{\\s*([A-Za-z0-9_.-]+)\\s*\\}\\}/',fn($m)=>(string) data_get($variables,$m[1],''),$body)??$body;} public function queue(string $tenantId,array $data):CommunicationDelivery{return CommunicationDelivery::query()->create([...$data,'tenant_id'=>$tenantId,'status'=>'queued']);} public function mark(string $tenantId,string $id,string $status):CommunicationDelivery{$d=CommunicationDelivery::query()->where('tenant_id',$tenantId)->findOrFail($id);$fields=['status'=>$status,'attempts'=>$d->attempts+1];if(in_array($status,['sent','delivered','read'],true))$fields[$status.'_at']=now();$d->update($fields);return $d;} }
