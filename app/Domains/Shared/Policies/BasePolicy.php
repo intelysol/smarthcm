@@ -9,6 +9,8 @@ abstract class BasePolicy
 {
     protected function belongsToSameTenant(User $user, Model $model): bool
     {
-        return isset($model->tenant_id) && $user->tenant_id === $model->tenant_id;
+        return isset($model->tenant_id)
+            && $user->tenant_id !== null
+            && (string) $user->tenant_id === (string) $model->tenant_id;
     }
 }

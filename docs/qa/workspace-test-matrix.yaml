@@ -1,0 +1,45 @@
+version: '2.69'
+workspace_test_matrix:
+  cross_workspace_access:
+    employee_to_platform:
+      role: 'employee'
+      target_url: '/platform/control-center'
+      expected_status: 403
+      redirect_fallback: '/employee/home'
+
+    employee_to_admin:
+      role: 'employee'
+      target_url: '/admin/dashboard'
+      expected_status: 403
+      redirect_fallback: '/employee/home'
+
+    employee_to_hr:
+      role: 'employee'
+      target_url: '/hr/dashboard'
+      expected_status: 403
+      redirect_fallback: '/employee/home'
+
+    manager_to_workbench:
+      role: 'manager'
+      target_url: '/manager/workbench'
+      expected_status: 200
+
+    platform_admin_to_all:
+      role: 'platform_admin'
+      target_urls:
+        - '/platform/control-center'
+        - '/admin/dashboard'
+        - '/hr/dashboard'
+        - '/manager/workbench'
+        - '/employee/home'
+        - '/executive/overview'
+        - '/operations/queues'
+      expected_status: 200
+
+    workspace_switching:
+      endpoint: '/workspace/switch'
+      method: 'POST'
+      payload:
+        workspace: 'manager'
+      expected_status: 302
+      expected_session_key: 'active_workspace'

@@ -202,10 +202,7 @@ return new class extends Migration
         }
 
         // 5. Extend or Create Compensation Components
-        if (Schema::hasTable('compensation_components')) {
-            // Already created or extend
-        } elseif (Schema::hasTable('payroll_components')) {
-            // Rename or alias: create compensation_components view/table
+        if (! Schema::hasTable('compensation_components')) {
             Schema::create('compensation_components', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->uuid('tenant_id')->index();
@@ -213,33 +210,6 @@ return new class extends Migration
                 $table->string('name', 150);
                 $table->string('component_type', 40); // basic, allowance, benefit, bonus, commission, overtime, reimbursement, deduction, tax, pension, employer_contribution, loan, advance, adjustment, arrear
                 $table->string('calculation_type', 40)->default('fixed'); // fixed, percentage_of_basic, percentage_of_gross, formula, hourly_rate, attendance_based, custom_rule
-                $table->decimal('default_amount', 19, 4)->nullable();
-                $table->decimal('percentage', 8, 4)->nullable();
-                $table->string('formula', 255)->nullable();
-                $table->boolean('is_taxable')->default(true);
-                $table->boolean('is_pensionable')->default(false);
-                $table->boolean('is_overtime_eligible')->default(false);
-                $table->boolean('is_recurring')->default(true);
-                $table->boolean('is_statutory')->default(false);
-                $table->boolean('is_active')->default(true);
-                $table->unsignedSmallInteger('priority_order')->default(10);
-                $table->text('description')->nullable();
-                $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-                $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-                $table->timestamps();
-                $table->softDeletes();
-
-                $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->unique(['tenant_id', 'code']);
-            });
-        } else {
-            Schema::create('compensation_components', function (Blueprint $table): void {
-                $table->uuid('id')->primary();
-                $table->uuid('tenant_id')->index();
-                $table->string('code', 60);
-                $table->string('name', 150);
-                $table->string('component_type', 40);
-                $table->string('calculation_type', 40)->default('fixed');
                 $table->decimal('default_amount', 19, 4)->nullable();
                 $table->decimal('percentage', 8, 4)->nullable();
                 $table->string('formula', 255)->nullable();
@@ -289,8 +259,8 @@ return new class extends Migration
             Schema::create('compensation_structure_components', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->uuid('tenant_id')->index();
-                $table->uuid('compensation_structure_id')->index();
-                $table->uuid('compensation_component_id')->index();
+                $table->uuid('compensation_structure_id')->index('comp_str_comp_str_id_idx');
+                $table->uuid('compensation_component_id')->index('comp_str_comp_comp_id_idx');
                 $table->string('calculation_type', 40)->default('fixed');
                 $table->decimal('default_amount', 19, 4)->nullable();
                 $table->decimal('percentage', 8, 4)->nullable();
@@ -299,8 +269,8 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('compensation_structure_id')->references('id')->on('compensation_structures')->cascadeOnDelete();
-                $table->foreign('compensation_component_id')->references('id')->on('compensation_components')->cascadeOnDelete();
+                $table->foreign('compensation_structure_id', 'fk_comp_struct_comp_struct_id')->references('id')->on('compensation_structures')->cascadeOnDelete();
+                $table->foreign('compensation_component_id', 'fk_comp_struct_comp_comp_id')->references('id')->on('compensation_components')->cascadeOnDelete();
             });
         }
 
@@ -339,7 +309,7 @@ return new class extends Migration
                 $table->uuid('id')->primary();
                 $table->uuid('tenant_id')->index();
                 $table->uuid('employee_compensation_id')->index();
-                $table->uuid('compensation_component_id')->index();
+                $table->uuid('compensation_component_id')->index('emp_comp_comp_id_idx');
                 $table->string('calculation_type', 40)->default('fixed');
                 $table->decimal('amount', 19, 4)->default(0);
                 $table->decimal('percentage', 8, 4)->nullable();
@@ -348,8 +318,8 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('employee_compensation_id')->references('id')->on('employee_compensations')->cascadeOnDelete();
-                $table->foreign('compensation_component_id')->references('id')->on('compensation_components')->cascadeOnDelete();
+                $table->foreign('employee_compensation_id', 'fk_emp_comp_comp_emp_comp_id')->references('id')->on('employee_compensations')->cascadeOnDelete();
+                $table->foreign('compensation_component_id', 'fk_emp_comp_comp_comp_id')->references('id')->on('compensation_components')->cascadeOnDelete();
             });
         }
 
@@ -547,7 +517,7 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('payroll_calculation_snapshot_id')->references('id')->on('payroll_calculation_snapshots')->cascadeOnDelete();
+                $table->foreign('payroll_calculation_snapshot_id', 'fk_pcl_calc_snap_id')->references('id')->on('payroll_calculation_snapshots')->cascadeOnDelete();
                 $table->foreign('payroll_run_id')->references('id')->on('payroll_runs')->cascadeOnDelete();
                 $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             });
@@ -833,7 +803,7 @@ return new class extends Migration
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
                 $table->foreign('payroll_run_id')->references('id')->on('payroll_runs')->cascadeOnDelete();
-                $table->unique(['tenant_id', 'journal_voucher_number']);
+                $table->unique(['tenant_id', 'journal_voucher_number'], 'payroll_acct_exp_tenant_jv_unique');
             });
         }
 

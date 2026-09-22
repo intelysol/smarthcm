@@ -28,7 +28,7 @@ return new class extends Migration
             $table->json('model_dependencies')->nullable();
             $table->json('tool_dependencies')->nullable();
             $table->timestamp('approved_at')->nullable();
-            $table->uuid('approved_by_user_id')->nullable();
+            $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
 
@@ -51,7 +51,7 @@ return new class extends Migration
             $table->text('limitations')->nullable();
             $table->json('data_restrictions')->nullable();
             $table->decimal('cost_per_1k_tokens', 10, 6)->default(0.000000);
-            $table->uuid('approved_by_user_id')->nullable();
+            $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
 
@@ -128,7 +128,7 @@ return new class extends Migration
             $table->json('evidence_payload')->nullable();
             $table->string('status')->default('DETECTED'); // DETECTED, TRIAGED, INVESTIGATING, CONTAINED, REMEDIATED, CLOSED
             $table->text('containment_action')->nullable();
-            $table->uuid('assigned_user_id')->nullable();
+            $table->foreignId('assigned_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('contained_at')->nullable();
             $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
@@ -145,7 +145,7 @@ return new class extends Migration
             $table->string('target_identifier'); // Specific code (e.g. ALL, USE_CASE_CODE, MODEL_NAME)
             $table->boolean('is_active')->default(true);
             $table->text('activation_reason');
-            $table->uuid('activated_by_user_id');
+            $table->foreignId('activated_by_user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamp('activated_at');
             $table->timestamp('deactivated_at')->nullable();
             $table->timestamps();
@@ -158,7 +158,7 @@ return new class extends Migration
         Schema::create('hcm_ai_gov_audits', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('event_type'); // USE_CASE_APPROVED, KILL_SWITCH_TRIGGERED, INCIDENT_RESOLVED, PROHIBITED_BLOCKED
             $table->string('target_type')->nullable();
             $table->string('target_id')->nullable();

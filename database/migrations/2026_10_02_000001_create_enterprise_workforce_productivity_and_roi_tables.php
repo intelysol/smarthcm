@@ -48,7 +48,7 @@ return new class extends Migration
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
                 $table->foreign('metric_definition_id')->references('id')->on('hcm_productivity_metric_definitions')->cascadeOnDelete();
-                $table->unique(['metric_definition_id', 'version']);
+                $table->unique(['metric_definition_id', 'version'], 'hcm_prod_met_ver_def_ver_unique');
             });
         }
 

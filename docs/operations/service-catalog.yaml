@@ -1,0 +1,218 @@
+# Enterprise Application Platform — Service Catalog
+# Version: 2.75.0
+# Last Updated: 2026-09-22
+
+services:
+  # -------------------------------------------------------------
+  # TIER 0: Mission-Critical Infrastructure & Foundations
+  # RTO: < 15 min | RPO: < 1 min | Availability Target: 99.99%
+  # -------------------------------------------------------------
+  - id: core-database
+    name: Primary Relational Database
+    tier: tier-0
+    domain: Platform / Storage
+    owner: Database Operations & Infrastructure Team
+    type: stateful
+    technology: MySQL 8.0+ / InnoDB
+    slo_reference: slo-db-availability
+    dependencies: []
+    description: Authoritative data store containing 1,000+ tables, tenant schemas, transactional records, and foreign keys.
+
+  - id: core-auth-identity
+    name: Authentication & Identity Management
+    tier: tier-0
+    domain: Identity / Platform
+    owner: Identity & Security Engineering
+    type: stateless
+    technology: Laravel Fortify / Sanctum / Multi-Session Engine
+    slo_reference: slo-auth-latency
+    dependencies: [core-database, core-cache]
+    description: Identity verification, multi-tenant authentication, RBAC/ABAC policy engine, and MFA enforcement.
+
+  - id: multi-tenancy-engine
+    name: Multi-Tenant Isolation Engine
+    tier: tier-0
+    domain: Tenancy / Platform
+    owner: Core Architecture Team
+    type: stateless
+    technology: TenantContext / Model Scopes / WorkspaceManager
+    slo_reference: slo-tenancy-isolation
+    dependencies: [core-database]
+    description: Tenant routing, cross-tenant isolation enforcement, tenant feature flags, and partition isolation.
+
+  - id: core-cache
+    name: Operational Cache Store
+    tier: tier-0
+    domain: Platform / In-Memory
+    owner: SRE Team
+    type: stateful
+    technology: Redis 7.0+
+    slo_reference: slo-cache-latency
+    dependencies: []
+    description: Distributed cache for sessions, tenant permissions, rate limiting tokens, and query buffers.
+
+  - id: queue-broker
+    name: Background Queue & Job Distribution Engine
+    tier: tier-0
+    domain: Asynchronous Processing
+    owner: SRE & Platform Team
+    type: stateful
+    technology: Redis / Laravel Horizon / Worker Cluster
+    slo_reference: slo-queue-ingestion
+    dependencies: [core-cache, core-database]
+    description: Asynchronous job broker handling transactional payroll, notifications, report generation, and webhooks.
+
+  - id: blob-storage
+    name: Secure Document & Asset Storage
+    tier: tier-0
+    domain: Storage / Assets
+    owner: Cloud Infrastructure
+    type: stateful
+    technology: S3 / Encrypted Local Storage
+    slo_reference: slo-storage-availability
+    dependencies: []
+    description: Repository for employee documents, payslip PDFs, uploaded receipts, compliance contracts, and avatars.
+
+  # -------------------------------------------------------------
+  # TIER 1: Core Business Operations
+  # RTO: < 1 hour | RPO: < 5 min | Availability Target: 99.95%
+  # -------------------------------------------------------------
+  - id: hcm-core
+    name: Core Human Capital & Employee Lifecycle
+    tier: tier-1
+    domain: Human Capital Management
+    owner: HCM Engineering
+    type: domain-module
+    technology: Laravel Eloquent / Employee Lifecycle Service
+    slo_reference: slo-api-availability
+    dependencies: [core-database, multi-tenancy-engine, core-auth-identity]
+    description: Employee records, organizational hierarchy, position management, job assignments, and onboarding/offboarding.
+
+  - id: payroll-engine
+    name: Enterprise Payroll & Compensation Engine
+    tier: tier-1
+    domain: Payroll / Compensation
+    owner: Payroll Engineering
+    type: domain-module
+    technology: PayrollCalculationService / Tax Deduction Matrix
+    slo_reference: slo-payroll-processing
+    dependencies: [core-database, multi-tenancy-engine, hcm-core]
+    description: Multi-tenant gross-to-net payroll runs, statutory deductions, bank transfer generation, and payslip dispatch.
+
+  - id: time-and-attendance
+    name: Time, Shift & Attendance Engine
+    tier: tier-1
+    domain: Attendance
+    owner: Workforce Management
+    type: domain-module
+    technology: AttendanceService / ShiftScheduler / Geofencing
+    slo_reference: slo-attendance-punch
+    dependencies: [core-database, multi-tenancy-engine, hcm-core]
+    description: Clock-in/out event processing, shift assignments, biometric device integration, and overtime tracking.
+
+  - id: performance-appraisal
+    name: Performance Management & Goals
+    tier: tier-1
+    domain: Talent / Performance
+    owner: Talent Management
+    type: domain-module
+    technology: PerformanceReviewService / GoalTracker
+    slo_reference: slo-api-availability
+    dependencies: [core-database, multi-tenancy-engine, hcm-core]
+    description: Review cycles, 360 feedback, competency assessments, and OKR tracking.
+
+  - id: recruitment-ats
+    name: Recruitment & Applicant Tracking
+    tier: tier-1
+    domain: Recruitment
+    owner: Talent Acquisition
+    type: domain-module
+    technology: ApplicantTrackingService / CandidatePipeline
+    slo_reference: slo-api-availability
+    dependencies: [core-database, multi-tenancy-engine]
+    description: Job requisitions, applicant pipelines, interview scheduling, and offer letters.
+
+  # -------------------------------------------------------------
+  # TIER 2: Secondary Business Services & Workflows
+  # RTO: < 4 hours | RPO: < 1 hour | Availability Target: 99.9%
+  # -------------------------------------------------------------
+  - id: workflow-engine
+    name: Multi-Step Approval & Workflow Engine
+    tier: tier-2
+    domain: Workflow / Automation
+    owner: Workflow Architecture Team
+    type: domain-module
+    technology: WorkflowManager / State Machine
+    slo_reference: slo-workflow-latency
+    dependencies: [core-database, multi-tenancy-engine, queue-broker]
+    description: Multi-level approval chains for leave, expenses, requisitions, and organizational change requests.
+
+  - id: analytics-engine
+    name: Executive Analytics & Governed KPI Engine
+    tier: tier-2
+    domain: Analytics / Intelligence
+    owner: Business Intelligence
+    type: analytical
+    technology: GovernedMetricEngine / Aggregation Pipelines
+    slo_reference: slo-analytics-latency
+    dependencies: [core-database, core-cache]
+    description: Authoritative workforce metrics, executive dashboards, labor cost aggregations, and turnover trends.
+
+  - id: notifications-hub
+    name: Unified Multi-Channel Notifications Hub
+    tier: tier-2
+    domain: Communication
+    owner: Core Platform Team
+    type: domain-module
+    technology: Mail / Database / SMS / Webhooks
+    slo_reference: slo-notification-delivery
+    dependencies: [queue-broker, core-database]
+    description: Transactional alerts, approval requests, system digests, and compliance escalation notifications.
+
+  - id: realtime-broadcasting
+    name: Real-Time Event Broadcasting (Reverb)
+    tier: tier-2
+    domain: Realtime
+    owner: SRE & Platform Team
+    type: stateful
+    technology: Laravel Reverb / WebSockets
+    slo_reference: slo-realtime-delivery
+    dependencies: [core-cache]
+    description: Real-time UI live updates, presence tracking, notification pings, and dashboard streaming.
+
+  - id: integration-hub
+    name: Enterprise Integration & Webhook Delivery Engine
+    tier: tier-2
+    domain: Integrations
+    owner: Integration Engineering
+    type: domain-module
+    technology: WebhookDispatcher / HMAC Signer / Retry Backoff
+    slo_reference: slo-webhook-delivery
+    dependencies: [queue-broker, core-database]
+    description: Outbound webhook delivery to third-party ERP/CRM systems, HMAC signature verification, and event retry queue.
+
+  # -------------------------------------------------------------
+  # TIER 3: Auxiliary & Value-Add Services
+  # RTO: < 24 hours | RPO: Best Effort | Availability Target: 99.0%
+  # -------------------------------------------------------------
+  - id: ai-concierge
+    name: HCM AI Assistant & Concierge Engine
+    tier: tier-3
+    domain: AI / Assistant
+    owner: AI Platform Team
+    type: external-dependent
+    technology: EmployeeAiActionService / LLM Gateway / Circuit Breaker
+    slo_reference: slo-ai-latency
+    dependencies: [core-database, multi-tenancy-engine]
+    description: Policy Q&A, draft performance review generation, and automated leave request assistance.
+
+  - id: commercial-billing
+    name: Platform Commercial Billing & Subscriptions
+    tier: tier-3
+    domain: Billing / Commercial
+    owner: Finance & Platform Ops
+    type: domain-module
+    technology: Stripe / TenantSubscriptionService / Invoicing
+    slo_reference: slo-api-availability
+    dependencies: [core-database]
+    description: Platform subscription plans, tenant invoicing, payment webhook processing, and tier entitlement enforcement.

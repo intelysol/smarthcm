@@ -1,0 +1,89 @@
+name: Enterprise Platform CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, release/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-quality-and-security:
+    name: Backend Quality, Security & Schema Verification
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: smarthcm
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Runtime
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo, pdo_mysql, redis, bcmath, intl, gd, zip
+          coverage: none
+
+      - name: Validate Composer Configuration
+        run: composer validate --strict
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Environment Configuration
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Authoritative Database Schema Migration
+        run: php artisan migrate --force
+
+      - name: Strict Schema Baseline Verification
+        run: php artisan hcm:schema:verify --strict
+
+      - name: Execute Security & Identity Governance Suites
+        run: vendor/bin/phpunit tests/Security
+
+      - name: Execute Multi-Tenant Isolation & IDOR Defense Suites
+        run: vendor/bin/phpunit tests/Tenant
+
+      - name: Execute API Contract & Error Uniformity Suites
+        run: vendor/bin/phpunit tests/API
+
+      - name: Execute Critical HCM User Journeys E2E
+        run: vendor/bin/phpunit tests/E2E
+
+      - name: Enterprise Release Certification Gate
+        run: php artisan platform:certify --json
+
+  frontend-build:
+    name: Frontend Quality & Production Asset Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Compile Production Assets
+        run: npm run build

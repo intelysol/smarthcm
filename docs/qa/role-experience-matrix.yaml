@@ -1,0 +1,58 @@
+version: '2.69'
+role_experience_matrix:
+  platform_super_admin:
+    default_workspace: 'platform'
+    allowed_workspaces:
+      - 'platform'
+      - 'tenant_admin'
+      - 'hr'
+      - 'manager'
+      - 'executive'
+      - 'operations'
+      - 'employee'
+    can_switch: true
+    landing_url: '/platform/control-center'
+
+  tenant_administrator:
+    default_workspace: 'tenant_admin'
+    allowed_workspaces:
+      - 'tenant_admin'
+      - 'hr'
+      - 'manager'
+      - 'employee'
+    can_switch: true
+    landing_url: '/admin/dashboard'
+
+  hr_director:
+    default_workspace: 'hr'
+    allowed_workspaces:
+      - 'hr'
+      - 'manager'
+      - 'executive'
+      - 'employee'
+    can_switch: true
+    landing_url: '/hr/dashboard'
+
+  people_manager:
+    default_workspace: 'manager'
+    allowed_workspaces:
+      - 'manager'
+      - 'employee'
+    can_switch: true
+    landing_url: '/manager/workbench'
+
+  standard_employee:
+    default_workspace: 'employee'
+    allowed_workspaces:
+      - 'employee'
+    can_switch: false
+    landing_url: '/employee/home'
+
+  executive_leader:
+    default_workspace: 'executive'
+    allowed_workspaces:
+      - 'executive'
+      - 'manager'
+      - 'employee'
+    can_switch: true
+    landing_url: '/executive/overview'

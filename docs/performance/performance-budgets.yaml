@@ -1,0 +1,60 @@
+# Enterprise Application Platform — Performance Budgets & Latency SLAs
+# Version: 2.77.0
+# Last Updated: 2026-09-22
+
+budgets:
+  - category: Interactive Read
+    description: Standard UI page loads and GET API endpoints (Directory, Profile, Dashboard, Attendance)
+    p50_target_ms: 50
+    p90_target_ms: 120
+    p95_target_ms: 200
+    p99_target_ms: 400
+    max_query_count: 5
+    max_memory_mb: 32
+    max_payload_kb: 250
+    blocking_ci_threshold_ms: 300
+
+  - category: Interactive Write
+    description: Single-record state mutations (Clock-in, Leave Application, Expense Submit, Profile Edit)
+    p50_target_ms: 80
+    p90_target_ms: 180
+    p95_target_ms: 300
+    p99_target_ms: 600
+    max_query_count: 8
+    max_memory_mb: 48
+    max_payload_kb: 500
+    blocking_ci_threshold_ms: 500
+
+  - category: Search Queries
+    description: Command palette, employee search, document query lookups
+    p50_target_ms: 30
+    p90_target_ms: 80
+    p95_target_ms: 150
+    p99_target_ms: 300
+    max_query_count: 3
+    max_memory_mb: 32
+    max_payload_kb: 100
+    blocking_ci_threshold_ms: 250
+
+  - category: Bulk & Batch Operations
+    description: CSV employee imports, batch status updates, mass attendance clocking
+    throughput_target: "> 250 records/sec"
+    max_memory_mb: 64
+    max_chunk_size: 250
+    processing_mode: Chunked cursor streaming with DB transactions per chunk
+    blocking_ci_threshold_ms: 1000
+
+  - category: Report Generation
+    description: Complex cross-domain reports (Headcount, Labor Cost, Tax Summary)
+    interactive_threshold_ms: 2000
+    async_queue_rule: "Reports exceeding 2.0s execution MUST automatically dispatch to background workers"
+    max_memory_mb: 128
+    blocking_ci_threshold_ms: 5000
+
+  - category: AI Assistant & Concierge
+    description: Policy Q&A, draft performance review generation
+    p90_time_to_first_token_ms: 1500
+    p95_completion_ms: 3500
+    circuit_breaker_timeout_ms: 5000
+    fallback_mode: Immediate deterministic response on timeout
+    blocking_ci_threshold_ms: 6000

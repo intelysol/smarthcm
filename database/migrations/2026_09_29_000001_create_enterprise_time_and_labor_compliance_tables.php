@@ -148,7 +148,7 @@ return new class extends Migration
                 $table->timestamp('created_at')->useCurrent();
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('attendance_adjustment_id')->references('id')->on('attendance_adjustments')->cascadeOnDelete();
+                $table->foreign('attendance_adjustment_id', 'fk_att_corr_aud_adj_id')->references('id')->on('attendance_adjustments')->cascadeOnDelete();
                 $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             });
         }

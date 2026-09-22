@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('hcm_ai_concierge_sessions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->uuid('employee_id')->nullable();
             $table->string('persona')->default('EMPLOYEE'); // EMPLOYEE, MANAGER, HR_USER
             $table->string('title')->nullable();
@@ -51,7 +51,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
             $table->uuid('session_id')->nullable();
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->uuid('employee_id');
             $table->string('action_type'); // SUBMIT_LEAVE_REQUEST, SUBMIT_ATTENDANCE_CORRECTION, CREATE_HR_REQUEST, SUBMIT_EXPENSE
             $table->string('risk_level')->default('MEDIUM'); // LOW, MEDIUM, HIGH
@@ -71,7 +71,7 @@ return new class extends Migration
         Schema::create('hcm_ai_concierge_suggestions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->uuid('employee_id');
             $table->string('category'); // LEAVE, ATTENDANCE, LEARNING, PERFORMANCE, COMPLIANCE
             $table->string('title');
@@ -84,7 +84,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->index(['tenant_id', 'employee_id', 'is_dismissed']);
+            $table->index(['tenant_id', 'employee_id', 'is_dismissed'], 'hcm_ai_conc_sug_t_emp_dsm_idx');
         });
 
         // 5. Concierge Feedback
@@ -92,7 +92,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
             $table->uuid('message_id');
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->boolean('is_positive');
             $table->string('reason_category')->nullable(); // ACCURACY, HELPFULNESS, TONE, INCORRECT_POLICY
             $table->text('comments')->nullable();

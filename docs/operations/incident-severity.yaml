@@ -1,0 +1,75 @@
+# Enterprise Application Platform — Incident Severity & Escalation Matrix
+# Version: 2.75.0
+# Last Updated: 2026-09-22
+
+severities:
+  - level: SEV-0
+    title: Critical Platform Catastrophe / Complete Outage
+    mtta_minutes: 5
+    mttr_minutes: 60
+    comms_cadence_minutes: 15
+    incident_commander: Head of Infrastructure / Principal SRE
+    impact:
+      - Complete platform unavailability or catastrophic data loss
+      - Core database unreachable for multiple tenants
+      - Critical security breach or uncontained data exfiltration
+    immediate_actions:
+      - Page On-Call SRE, Lead Architect, and VP Engineering immediately
+      - Open dedicated Incident Bridge (War Room)
+      - Post public status page update ("Investigating service outage")
+      - Freeze all active production deployments
+
+  - level: SEV-1
+    title: Major Outage / Critical Business Workflow Down
+    mtta_minutes: 15
+    mttr_minutes: 120
+    comms_cadence_minutes: 30
+    incident_commander: Senior SRE / Technical Lead
+    impact:
+      - Critical domain workflow completely blocked (e.g. Payroll calculation failure on payroll cut-off day)
+      - Single large enterprise tenant completely unable to log in or operate
+      - Widespread queue stall affecting time-critical transactions
+    immediate_actions:
+      - Page primary on-call domain engineer and SRE
+      - Update internal incident tracker
+      - Isolate failing worker or routing tier; failover to secondary if needed
+
+  - level: SEV-2
+    title: Significant Degradation / Non-Critical Feature Down
+    mtta_minutes: 30
+    mttr_minutes: 240
+    comms_cadence_minutes: 60
+    incident_commander: Domain Lead / On-Call Engineer
+    impact:
+      - Elevated API latency (p95 > 500ms) with minor packet drops
+      - Secondary features unavailable (e.g. Report exports failing, Reverb WebSockets offline)
+      - Intermittent third-party integration webhook delivery failures
+    immediate_actions:
+      - Notify domain engineering team in operational Slack channel
+      - Investigate root cause via correlated traces and logs
+      - Apply circuit breaker or throttle background workloads
+
+  - level: SEV-3
+    title: Minor Operational Anomaly / Localized Glitch
+    mtta_minutes: 120
+    mttr_minutes: 1440
+    comms_cadence_minutes: 240
+    incident_commander: Support / Domain Engineer
+    impact:
+      - Edge case bug affecting isolated user actions
+      - AI Assistant fallback to deterministic rule engine
+      - Non-critical scheduled report generation delayed by 1 hour
+    immediate_actions:
+      - Log ticket in operational tracking system
+      - Address during regular operational shifts with priority patch
+
+  - level: SEV-4
+    title: Low / Cosmetic Inquiry / Informational Alert
+    mtta_minutes: 480
+    mttr_minutes: 4320
+    comms_cadence_minutes: As needed
+    incident_commander: Assigned Engineer
+    impact:
+      - UI cosmetic discrepancy, typographical mistake, or informational warning log spike
+    immediate_actions:
+      - Schedule into regular sprint backlog or maintenance window

@@ -1,0 +1,41 @@
+version: "1.0"
+updated_at: "2026-09-22T08:45:00Z"
+
+archival_architecture:
+  storage_classes:
+    - name: "operational_warm"
+      target: "database_archive_tables"
+      cost_factor: 1.0
+      retrieval_speed: "instant"
+    - name: "cold_object_storage"
+      target: "s3_standard_ia"
+      cost_factor: 0.35
+      retrieval_speed: "< 5s"
+    - name: "glacier_worm_vault"
+      target: "s3_glacier_flexible"
+      cost_factor: 0.10
+      retrieval_speed: "3-5 hours"
+
+batch_processing:
+  default_chunk_size: 500
+  max_chunk_size: 2500
+  checkpoint_frequency: 100
+  max_retry_attempts: 3
+  backoff_seconds: 60
+  idempotent_key_template: "archive:{tenant_id}:{data_class}:{batch_id}"
+
+manifest_standards:
+  hash_algorithm: "SHA-256"
+  compression: "gzip"
+  required_fields:
+    - archive_id
+    - tenant_id
+    - data_class
+    - original_table
+    - record_count
+    - file_count
+    - checksum_sha256
+    - encryption_cipher
+    - policy_version
+    - created_at
+    - retention_until

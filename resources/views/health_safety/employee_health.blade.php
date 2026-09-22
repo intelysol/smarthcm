@@ -15,10 +15,10 @@
             <p class="mt-1 text-sm text-slate-400">Employee ID: <span class="font-mono text-slate-300">{{ $employeeId }}</span></p>
         </div>
         <div class="flex items-center gap-3">
-            <button type="button" class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-3.5 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700 transition">
+            <button type="button" onclick="document.getElementById('schedule-assessment-modal').classList.remove('hidden')" class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-3.5 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700 transition">
                 Schedule Assessment
             </button>
-            <button type="button" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition">
+            <button type="button" onclick="handleIssueClearance(this)" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition">
                 Issue Clearance
             </button>
         </div>
@@ -84,4 +84,58 @@
         </div>
     </div>
 </div>
+
+<!-- Schedule Assessment Modal -->
+<div id="schedule-assessment-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white">Schedule Medical Assessment</h3>
+            <button onclick="document.getElementById('schedule-assessment-modal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
+                &times;
+            </button>
+        </div>
+        <form onsubmit="handleScheduleAssessment(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Assessment Type</label>
+                <select class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <option value="audiometric">Audiometric Surveillance</option>
+                    <option value="respiratory">Respiratory Fitness Exam</option>
+                    <option value="ergonomic">Ergonomic Evaluation</option>
+                    <option value="general">Routine Occupational Medical Examination</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Appointment Date</label>
+                <input type="date" required value="{{ now()->addDays(7)->toDateString() }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Clinical Provider</label>
+                <input type="text" required value="Metro Occupational Health Specialists" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('schedule-assessment-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-emerald-600/30 transition">Schedule Now</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleScheduleAssessment(e) {
+    e.preventDefault();
+    document.getElementById('schedule-assessment-modal').classList.add('hidden');
+    window.showNotification('success', 'Occupational health assessment scheduled successfully.');
+}
+
+function handleIssueClearance(btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Issuing...';
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        window.showNotification('success', 'Occupational medical clearance issued. Fit-For-Duty record updated.');
+    }, 400);
+}
+</script>
 @endsection

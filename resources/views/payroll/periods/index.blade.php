@@ -40,11 +40,11 @@
                     </td>
                     <td class="px-6 py-4 text-right space-x-2">
                         @if(! $period->isLocked())
-                        <button class="text-xs px-3 py-1.5 rounded bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 border border-rose-500/30 transition">
+                        <button onclick="handlePeriodLock(this, '{{ $period->id }}')" class="text-xs px-3 py-1.5 rounded bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 border border-rose-500/30 transition">
                             <i class="fa-solid fa-lock mr-1"></i> Lock
                         </button>
                         @else
-                        <button class="text-xs px-3 py-1.5 rounded bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 border border-amber-500/30 transition">
+                        <button onclick="handlePeriodLock(this, '{{ $period->id }}')" class="text-xs px-3 py-1.5 rounded bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 border border-amber-500/30 transition">
                             <i class="fa-solid fa-lock-open mr-1"></i> Reopen
                         </button>
                         @endif
@@ -63,4 +63,25 @@
         {{ $periods->links() }}
     </div>
 </div>
+
+<script>
+    async function handlePeriodLock(btn, periodId) {
+        btn.disabled = true;
+        btn.innerText = '...';
+
+        try {
+            const res = await fetch(`/api/v1/hcm/payroll/periods/${periodId}/lock`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            setTimeout(() => location.reload(), 600);
+        } catch (err) {
+            btn.disabled = false;
+        }
+    }
+</script>
 @endsection

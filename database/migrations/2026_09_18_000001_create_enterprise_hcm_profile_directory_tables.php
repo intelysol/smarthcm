@@ -31,14 +31,13 @@ return new class extends Migration
             $table->string('request_number', 50)->unique();
             $table->string('status', 30)->default('pending')->index(); // pending, approved, rejected, cancelled
             $table->timestamp('requested_at');
-            $table->uuid('reviewed_by')->nullable();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->string('rejection_reason', 255)->nullable();
             $table->text('comments')->nullable();
             $table->timestamps();
 
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->foreign('reviewed_by')->references('id')->on('users')->nullOnDelete();
         });
 
         // 3. Employee Profile Change Request Items
@@ -90,7 +89,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
             $table->uuid('employee_id')->nullable()->index();
-            $table->uuid('actor_id')->nullable()->index();
+            $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('event_name', 50)->index();
             $table->string('section', 50)->nullable();
             $table->json('details')->nullable();
@@ -98,7 +97,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('employee_id')->references('id')->on('employees')->nullOnDelete();
-            $table->foreign('actor_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 

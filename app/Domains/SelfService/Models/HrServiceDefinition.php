@@ -80,4 +80,14 @@ class HrServiceDefinition extends Model
     {
         return $this->hasMany(HrServiceTemplate::class, 'hr_service_definition_id');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return $this->status === 'active';
+    }
 }

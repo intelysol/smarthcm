@@ -33,9 +33,9 @@
                                 <span class="text-[11px] text-amber-700 font-semibold block mt-1">Due by: {{ $req->due_date->format('M d, Y') }}</span>
                             @endif
                         </div>
-                        <button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
-                            Upload Now
-                        </button>
+                        <a href="{{ route('portal.documents') }}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition flex items-center">
+                            <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Upload Now
+                        </a>
                     </div>
                 @endforeach
             </div>
@@ -101,9 +101,9 @@
                             Download
                         </a>
                         @if($doc->verification_status === 'rejected')
-                            <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
-                                Replace
-                            </button>
+                            <a href="{{ route('portal.documents') }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition flex items-center">
+                                <i class="fa-solid fa-rotate mr-1"></i> Replace
+                            </a>
                         @endif
                     </div>
                 </div>

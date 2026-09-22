@@ -202,7 +202,7 @@ return new class extends Migration
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
                 $table->foreign('roster_period_id')->references('id')->on('roster_periods')->cascadeOnDelete();
                 $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-                $table->unique(['roster_period_id', 'employee_id']);
+                $table->unique(['roster_period_id', 'employee_id'], 'hcm_sched_ack_period_emp_unique');
             });
         }
 

@@ -1,0 +1,37 @@
+# Enterprise Application Platform — Disaster Recovery Exceptions & Risk Register
+# Version: 2.76.0
+# Last Updated: 2026-09-22
+
+exceptions:
+  - id: DR-EXC-001
+    service: core-database
+    title: Local Developer Environment Single-Node Operation
+    risk_level: Low
+    reason: Local development environments run single-node MySQL without multi-AZ replication.
+    mitigation: Full mysqldump snapshots and automated restore scripts are tested in CI/CD against isolated databases.
+    owner: Database Operations Team
+    approved_by: Head of Engineering
+    expiry_date: "2027-09-22"
+    status: ACTIVE
+
+  - id: DR-EXC-002
+    service: core-cache
+    title: Ephemeral Session Cache Cold Rebuild
+    risk_level: Low
+    reason: In catastrophic multi-region failure, active web sessions expire and require user re-authentication.
+    mitigation: Security tokens and sessions are intentionally ephemeral; re-authentication triggers fresh MFA verification.
+    owner: Identity & Security Engineering
+    approved_by: Chief Information Security Officer
+    expiry_date: "2027-09-22"
+    status: ACTIVE
+
+  - id: DR-EXC-003
+    service: ai-concierge
+    title: Third-Party LLM Provider Regional Dependency
+    risk_level: Medium
+    reason: Upstream OpenAI / Anthropic APIs lack multi-cloud failover within the same API contract.
+    mitigation: Application incorporates deterministic rule engine fallback; zero core HCM workflows are blocked if AI is offline.
+    owner: AI Platform Team
+    approved_by: VP of Product
+    expiry_date: "2027-09-22"
+    status: ACTIVE

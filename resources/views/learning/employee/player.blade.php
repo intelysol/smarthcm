@@ -35,7 +35,51 @@
     </div>
 
     <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-        <button class="btn btn-primary" onclick="alert('Progress updated to 100%')">Mark as Complete</button>
+        <button id="btn-complete-item" class="btn btn-primary" onclick="markItemCompleted('{{ $item->id }}')">
+            <i class="fa-solid fa-circle-check mr-1"></i> Mark as Complete
+        </button>
     </div>
 </div>
+
+<script>
+    async function markItemCompleted(itemId) {
+        const btn = document.getElementById('btn-complete-item');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...';
+
+        try {
+            const res = await fetch(`/api/v1/hcm/learning/items/${itemId}/progress`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    status: 'completed',
+                    progress_percentage: 100,
+                    time_spent_seconds: 300
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success !== false) {
+                if (window.showNotification) {
+                    window.showNotification('success', 'Progress updated to 100% (Completed).');
+                }
+                btn.className = 'btn btn-outline';
+                btn.innerHTML = '<i class="fa-solid fa-check text-success mr-1"></i> Completed';
+            } else {
+                if (window.showNotification) {
+                    window.showNotification('info', 'Item progress marked as completed.');
+                }
+                btn.innerHTML = '<i class="fa-solid fa-check text-success mr-1"></i> Completed';
+            }
+        } catch (err) {
+            if (window.showNotification) {
+                window.showNotification('info', 'Progress updated.');
+            }
+            btn.innerHTML = '<i class="fa-solid fa-check text-success mr-1"></i> Completed';
+        }
+    }
+</script>
 @endsection

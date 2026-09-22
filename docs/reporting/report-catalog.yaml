@@ -1,0 +1,227 @@
+# Enterprise Report Catalog
+# Authoritative Dictionary of Governed Enterprise Reports
+version: "1.0"
+governance_policy: "EPIC-2.73-REPORT-CATALOG-SPEC"
+last_certified: "2026-09-16"
+
+reports:
+  # =================================================================
+  # 1. OPERATIONAL REPORTS (Daily Business Execution & Exceptions)
+  # =================================================================
+  - report_id: "REP-OPS-001"
+    name: "Employee Master Directory"
+    description: "Full active employee roster with organizational assignments, contact information, and employment status."
+    domain: "Core HR"
+    category: "Operational"
+    owner: "Core HR Operations"
+    data_sources: ["employees", "departments", "positions", "companies"]
+    permissions: ["report.view", "employee.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["as_of_date", "department_id", "status"]
+    filters: ["company_id", "department_id", "employment_status", "employment_type"]
+    columns: ["employee_number", "full_name", "official_email", "department", "position", "joining_date", "status"]
+    metrics: ["total_records", "active_count"]
+    export_formats: ["CSV", "XLSX", "PDF"]
+    schedule_support: true
+    sensitivity: "Internal"
+    freshness: "real-time"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-OPS-002"
+    name: "Attendance Exceptions & Missed Punches"
+    description: "Operational log of missing clock-outs, tardiness violations, and unexcused absences requiring manager resolution."
+    domain: "Workforce Time & Attendance"
+    category: "Operational"
+    owner: "Time & Attendance Administrator"
+    data_sources: ["timesheets", "attendance_records", "employees"]
+    permissions: ["report.view", "attendance.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["start_date", "end_date", "department_id"]
+    filters: ["department_id", "exception_type", "resolution_status"]
+    columns: ["employee_code", "employee_name", "date", "scheduled_start", "actual_start", "exception_type", "severity"]
+    metrics: ["exception_count", "unresolved_count"]
+    export_formats: ["CSV", "XLSX"]
+    schedule_support: true
+    sensitivity: "Internal"
+    freshness: "real-time"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-OPS-003"
+    name: "Pending Leave Requests & Balances"
+    description: "Operational queue of submitted leave applications awaiting manager approval with remaining accrued entitlement."
+    domain: "Absence Management"
+    category: "Operational"
+    owner: "Absence Management Operations"
+    data_sources: ["leave_applications", "leave_types", "leave_balances", "employees"]
+    permissions: ["report.view", "leave.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["department_id", "leave_type_id"]
+    filters: ["status = 'pending'", "department_id"]
+    columns: ["request_id", "employee_name", "leave_type", "start_date", "end_date", "duration_days", "available_balance"]
+    metrics: ["pending_requests_count", "total_days_requested"]
+    export_formats: ["CSV", "XLSX"]
+    schedule_support: true
+    sensitivity: "Internal"
+    freshness: "real-time"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-OPS-004"
+    name: "Payroll Pre-Close Exception Register"
+    description: "Pre-payroll execution audit detecting missing tax IDs, negative net pay, or missing timesheet inputs."
+    domain: "Payroll Processing"
+    category: "Operational"
+    owner: "Lead Payroll Specialist"
+    data_sources: ["payroll_inputs", "payroll_periods", "employees"]
+    permissions: ["report.view", "payroll.view", "payroll.admin"]
+    tenant_scope: "strict_tenant"
+    parameters: ["payroll_period_id"]
+    filters: ["exception_severity", "department_id"]
+    columns: ["employee_code", "employee_name", "payroll_period", "exception_code", "description", "action_required"]
+    metrics: ["blocking_exceptions_count", "warning_exceptions_count"]
+    export_formats: ["CSV", "PDF"]
+    schedule_support: false
+    sensitivity: "Restricted"
+    freshness: "real-time"
+    certification_status: "CERTIFIED"
+
+  # =================================================================
+  # 2. MANAGEMENT REPORTS (Planning, Capacity & Team Oversight)
+  # =================================================================
+  - report_id: "REP-MGT-001"
+    name: "Department Headcount & FTE Distribution"
+    description: "Detailed breakdown of headcount, FTE, contractor ratios, and open vacancy allocations by department."
+    domain: "Organizational Design & Core HR"
+    category: "Management"
+    owner: "HR Business Partners"
+    data_sources: ["employees", "positions", "departments"]
+    permissions: ["report.view", "analytics.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["as_of_date", "business_unit_id"]
+    filters: ["company_id", "business_unit_id", "department_id"]
+    columns: ["department_name", "headcount", "fte", "full_time", "part_time", "contractors", "vacancies"]
+    metrics: ["total_headcount", "total_fte", "vacancy_rate"]
+    export_formats: ["CSV", "XLSX", "PDF"]
+    schedule_support: true
+    sensitivity: "Internal"
+    freshness: "daily"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-MGT-002"
+    name: "Workforce Turnover & Retention Analysis"
+    description: "Analytical overview of voluntary vs involuntary turnover rates, tenure brackets, and exit reasons."
+    domain: "Talent Management"
+    category: "Management"
+    owner: "Director of Talent Acquisition & Retention"
+    data_sources: ["separation_cases", "employees"]
+    permissions: ["report.view", "analytics.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["start_date", "end_date", "department_id"]
+    filters: ["department_id", "separation_type", "tenure_bracket"]
+    columns: ["department", "average_headcount", "total_exits", "voluntary_exits", "involuntary_exits", "turnover_rate"]
+    metrics: ["turnover_rate_percent", "voluntary_rate_percent", "regrettable_exits_count"]
+    export_formats: ["CSV", "XLSX", "PDF"]
+    schedule_support: true
+    sensitivity: "Confidential"
+    freshness: "daily"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-MGT-003"
+    name: "Management Payroll Register & Cost Summary"
+    description: "Aggregated gross-to-net payroll summary including regular earnings, overtime premiums, and employer taxes."
+    domain: "Payroll"
+    category: "Management"
+    owner: "Compensation & Benefits Director"
+    data_sources: ["payroll_runs", "payroll_entries", "departments"]
+    permissions: ["report.view", "payroll.view", "compensation.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["payroll_period_id", "department_id"]
+    filters: ["cost_center_id", "department_id"]
+    columns: ["cost_center", "department", "headcount_paid", "gross_earnings", "overtime_total", "employer_contributions", "net_pay"]
+    metrics: ["total_gross_spend", "total_net_disbursed", "average_cost_per_employee"]
+    export_formats: ["CSV", "XLSX", "PDF"]
+    schedule_support: true
+    sensitivity: "Restricted"
+    freshness: "monthly"
+    certification_status: "CERTIFIED"
+
+  # =================================================================
+  # 3. EXECUTIVE REPORTS (Strategic Oversight & Board Governance)
+  # =================================================================
+  - report_id: "REP-EXEC-001"
+    name: "Executive Workforce Intelligence Briefing"
+    description: "Board-level monthly strategic briefing summarizing enterprise headcount growth, labor runrate, and workforce ROI."
+    domain: "Executive Analytics"
+    category: "Executive"
+    owner: "Chief Human Resources Officer (CHRO)"
+    data_sources: ["employees", "payroll_runs", "timesheets", "talent_pools"]
+    permissions: ["report.view", "executive.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["reporting_quarter", "comparison_year"]
+    filters: ["legal_entity_id", "business_unit_id"]
+    columns: ["business_unit", "headcount", "growth_yoy", "labor_cost_runrate", "turnover_rate", "critical_skills_coverage"]
+    metrics: ["enterprise_headcount", "annualized_turnover", "labor_cost_per_fte", "productivity_index"]
+    export_formats: ["PDF", "XLSX"]
+    schedule_support: true
+    sensitivity: "Confidential"
+    freshness: "daily"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-EXEC-002"
+    name: "Labor Cost & Headcount Forecast"
+    description: "Comparison of current labor spend runrate against annual fiscal headcount budget allocations."
+    domain: "Workforce Cost"
+    category: "Executive"
+    owner: "Chief Financial Officer (CFO)"
+    data_sources: ["payroll_runs", "positions", "compensation_bands"]
+    permissions: ["report.view", "executive.view", "finance.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["fiscal_year", "as_of_date"]
+    filters: ["division_id", "cost_center_id"]
+    columns: ["division", "budgeted_headcount", "actual_headcount", "variance_headcount", "budgeted_cost", "actual_cost", "variance_cost"]
+    metrics: ["headcount_variance", "budget_variance_amount", "variance_percent"]
+    export_formats: ["PDF", "XLSX"]
+    schedule_support: true
+    sensitivity: "Confidential"
+    freshness: "monthly"
+    certification_status: "CERTIFIED"
+
+  # =================================================================
+  # 4. REGULATORY & COMPLIANCE REPORTS (Statutory Audits)
+  # =================================================================
+  - report_id: "REP-REG-001"
+    name: "Mandatory Regulatory Compliance & Certifications"
+    description: "Statutory compliance audit reporting workforce completion rates for OSHA, anti-harassment, and infosec training."
+    domain: "Workforce Compliance"
+    category: "Regulatory"
+    owner: "Chief Compliance & Ethics Officer"
+    data_sources: ["courses", "course_enrollments", "employees"]
+    permissions: ["report.view", "compliance.view"]
+    tenant_scope: "strict_tenant"
+    parameters: ["compliance_cycle", "department_id"]
+    filters: ["is_mandatory = 1", "compliance_status"]
+    columns: ["employee_number", "employee_name", "department", "course_name", "completion_date", "score", "expiration_date", "status"]
+    metrics: ["compliance_rate_percent", "overdue_certifications_count"]
+    export_formats: ["CSV", "XLSX", "PDF"]
+    schedule_support: true
+    sensitivity: "Internal"
+    freshness: "daily"
+    certification_status: "CERTIFIED"
+
+  - report_id: "REP-REG-002"
+    name: "Platform Security & Access Audit Trail"
+    description: "Cryptographically verified security audit log tracking user authentication, permission escalations, and sensitive record exports."
+    domain: "Platform Security"
+    category: "Regulatory"
+    owner: "Chief Information Security Officer (CISO)"
+    data_sources: ["audit_events", "users"]
+    permissions: ["report.view", "security.audit"]
+    tenant_scope: "strict_tenant"
+    parameters: ["start_date", "end_date", "event_type"]
+    filters: ["severity", "actor_id", "event_type"]
+    columns: ["event_id", "timestamp", "actor_id", "event_type", "action", "entity_type", "entity_id", "integrity_hash"]
+    metrics: ["total_security_events", "critical_incidents_count"]
+    export_formats: ["CSV", "PDF"]
+    schedule_support: true
+    sensitivity: "Restricted"
+    freshness: "real-time"
+    certification_status: "CERTIFIED"

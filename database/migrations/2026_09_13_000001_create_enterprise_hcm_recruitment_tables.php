@@ -333,7 +333,7 @@ return new class extends Migration {
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('interview_id')->references('id')->on('hcm_recruitment_interviews')->cascadeOnDelete();
-            $table->unique(['interview_id', 'interviewer_id']);
+            $table->unique(['interview_id', 'interviewer_id'], 'hcm_rec_int_part_int_usr_unique');
         });
 
         // 16. Interview Evaluations & Scorecards
@@ -355,7 +355,7 @@ return new class extends Migration {
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('interview_id')->references('id')->on('hcm_recruitment_interviews')->cascadeOnDelete();
-            $table->unique(['interview_id', 'evaluator_id']);
+            $table->unique(['interview_id', 'evaluator_id'], 'hcm_rec_int_eval_int_eval_unique');
         });
 
         // 17. Offers & Versioning

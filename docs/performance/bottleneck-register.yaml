@@ -1,0 +1,88 @@
+# Enterprise Application Platform — Performance Bottleneck Register
+# Version: 2.77.0
+# Last Updated: 2026-09-22
+
+bottlenecks:
+  - id: PERF-001
+    domain: Core HCM
+    component: Employee Directory View
+    symptom: N+1 query loop when rendering employee department and position titles
+    measurement: 101 database queries executed to render a list of 25 employees
+    root_cause: Lazy loading `$employee->department->name` and `$employee->position->title` in Blade template loop
+    severity: High
+    optimization: Implemented eager loading with `with(['department:id,name', 'position:id,title'])`
+    owner: HCM Domain Lead
+    status: RESOLVED
+    before: 101 queries (240ms)
+    after: 2 queries (14ms)
+    regression_test: test_employee_directory_query_count_is_constant
+
+  - id: PERF-002
+    domain: Attendance
+    component: Biometric Punch Ingestion
+    symptom: High database row lock contention during morning clock-in rush (08:30–09:00)
+    measurement: Query latency spiked from 15ms to 1,450ms with intermittent deadlocks
+    root_cause: Single un-indexed query checking for active shift on the entire table without tenant scoping
+    severity: Critical
+    optimization: Created composite index `idx_punch_tenant_emp_time(tenant_id, employee_id, punch_time)` and offloaded shift match to queue
+    owner: Workforce Management Lead
+    status: RESOLVED
+    before: 1,450ms (deadlocks observed)
+    after: 18ms (0 deadlocks)
+    regression_test: test_attendance_punch_ingestion_under_concurrency
+
+  - id: PERF-003
+    domain: Identity
+    component: Authorization & Permission Evaluation
+    symptom: Repeated database lookups for user roles and permissions on every HTTP request
+    measurement: 14 queries per authenticated request just evaluating policy gates
+    root_cause: Uncached permission relation loaded repeatedly in middleware and policies
+    severity: High
+    optimization: Implemented tenant-scoped user permission caching with version-based invalidation tag
+    owner: Security & Identity Lead
+    status: RESOLVED
+    before: 14 queries (42ms)
+    after: 0 queries (cache hit < 1ms)
+    regression_test: test_permission_evaluation_cache_hit_rate
+
+  - id: PERF-004
+    domain: Payroll
+    component: Gross-to-Net Calculation Batch
+    symptom: PHP memory exhaustion (Out of Memory) when processing 5,000+ employees
+    measurement: Memory consumption scaled to > 512MB, crashing background workers
+    root_cause: Loading entire tenant employee collection into an in-memory Eloquent Collection
+    severity: Critical
+    optimization: Migrated to cursor-based chunking with `lazyById(250)` and garbage collection triggering
+    owner: Payroll Lead
+    status: RESOLVED
+    before: 540MB peak RAM (worker OOM)
+    after: 48MB bounded peak RAM
+    regression_test: test_payroll_batch_memory_consumption_bounded
+
+  - id: PERF-005
+    domain: Analytics
+    component: Executive Workforce Cost Dashboard
+    symptom: Dashboard took 4.5 seconds to load due to multi-year table full-table scans
+    measurement: 4,500ms execution time examining 250,000 payroll history rows
+    root_cause: Live aggregation of raw payroll line items on every dashboard page view
+    severity: Medium
+    optimization: Pre-computed monthly analytical snapshot stored in `workforce_metrics_snapshots`
+    owner: Business Intelligence Lead
+    status: RESOLVED
+    before: 4,500ms
+    after: 65ms
+    regression_test: test_analytics_headcount_dashboard_latency
+
+  - id: PERF-006
+    domain: Architecture
+    component: Multi-Tenant Queue Worker Throttling
+    symptom: Large tenant bulk export stalled time-sensitive transactional emails for smaller tenants
+    measurement: Notification queue wait time degraded from 2s to 450s during enterprise batch imports
+    root_cause: Single default queue shared between high-volume bulk imports and transactional mailers
+    severity: High
+    optimization: Established dedicated priority queue tiers (`critical`, `high`, `default`, `bulk`) with separate worker allocations
+    owner: Platform SRE Lead
+    status: RESOLVED
+    before: 450s wait time (starvation)
+    after: 1.2s wait time (complete isolation)
+    regression_test: test_multi_tenant_noisy_neighbor_isolation

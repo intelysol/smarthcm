@@ -48,12 +48,6 @@ class User extends Authenticatable
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::creating(function (self $user): void {
-            $user->uuid ??= (string) Str::uuid();
-        });
-    }
 
     /**
      * @return BelongsTo<Tenant, User>

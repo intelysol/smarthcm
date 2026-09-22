@@ -1,0 +1,40 @@
+version: '2.69'
+last_updated: '2026-09-16'
+
+test_ownership:
+  platform_admin:
+    owner: 'Platform Engineering & DevOps'
+    suites:
+      - 'tests/Feature/Workspace/WorkspaceExperienceTest.php'
+      - 'tests/Security/PlatformSecurityTest.php'
+      - 'tests/Security/AiGovernanceSafetyTest.php'
+
+  tenant_admin:
+    owner: 'Multi-Tenant Architecture Team'
+    suites:
+      - 'tests/Tenant/TenantIsolationRegressionTest.php'
+      - 'tests/Security/AuthorizationTestSuiteTest.php'
+
+  hr_operations:
+    owner: 'HCM Domain Engineering'
+    suites:
+      - 'tests/E2E/CriticalHcmJourneysTest.php'
+      - 'tests/Feature/UI/InteractiveWorkflowE2ETest.php'
+
+  manager_workspace:
+    owner: 'Manager Experience & Workflow Squad'
+    suites:
+      - 'tests/Feature/Workspace/WorkspaceExperienceTest.php'
+      - 'tests/Feature/EmployeeExperience/EmployeeExperienceTest.php'
+
+  employee_self_service:
+    owner: 'Employee Experience & Mobile Squad'
+    suites:
+      - 'tests/Feature/Workspace/WorkspaceExperienceTest.php'
+      - 'tests/API/ApiRegressionSuiteTest.php'
+
+  security_and_isolation:
+    owner: 'SecOps Lead'
+    suites:
+      - 'tests/Security/WorkspaceAuthorizationTest.php'
+      - 'tests/Security/SecurityRegressionSuiteTest.php'

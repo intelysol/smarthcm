@@ -1,5 +1,12 @@
 <?php
 
+// Production Health Check Endpoints
+Route::get('/health', [\App\Domains\Platform\Http\Controllers\HealthCheckController::class, 'health']);
+Route::get('/health/live', [\App\Domains\Platform\Http\Controllers\HealthCheckController::class, 'live']);
+Route::get('/health/ready', [\App\Domains\Platform\Http\Controllers\HealthCheckController::class, 'ready']);
+Route::get('/health/dependencies', [\App\Domains\Platform\Http\Controllers\HealthCheckController::class, 'dependencies']);
+Route::get('/health/services', [\App\Domains\Platform\Http\Controllers\HealthCheckController::class, 'services']);
+
 require base_path('app/Domains/Organization/Routes/api.php');
 require base_path('app/Domains/Employee/Routes/api.php');
 require base_path('app/Domains/SelfService/Routes/api.php');
@@ -47,4 +54,8 @@ require base_path('app/Domains/WorkforceIntelligence/Routes/api.php');
 require base_path('app/Domains/WorkforceGovernance/Routes/api.php');
 require base_path('app/Domains/EmployeeAi/Routes/api.php');
 require base_path('app/Domains/ResponsibleAi/Routes/api.php');
-
+require base_path('app/Domains/AiOperations/Routes/api.php');
+require base_path('app/Domains/TenantAdmin/Routes/api.php');
+require base_path('app/Domains/EmployeeExperience/Routes/api.php');
+require base_path('app/Domains/ServiceDelivery/Routes/api.php');
+require base_path('routes/billing_api.php');

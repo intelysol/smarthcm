@@ -1,0 +1,256 @@
+# Enterprise Application Platform — Recovery Services Inventory & Certification State
+# Version: 2.76.0
+# Last Updated: 2026-09-22
+
+services:
+  - service: core-database
+    name: Primary Relational Database (MySQL 8.0+)
+    tier: tier-0
+    rpo: "< 15m"
+    rto: "< 60m"
+    backup: Full daily mysqldump (--single-transaction) + 15m binlog archives to offsite S3
+    restore: Automated restore.ps1 / restore.sh with checksum verification and PITR replay
+    dependencies: []
+    failover: Active-Passive Multi-AZ Replica with automated DNS promotion
+    validation: Schema count audit (985 tables, 2180 FKs) + orphan check
+    owner: Database Operations & Infrastructure Team
+    last_tested: "2026-09-22T08:00:00Z"
+    status: CERTIFIED
+
+  - service: core-auth-identity
+    name: Authentication & Identity Management
+    tier: tier-0
+    rpo: "0m"
+    rto: "< 15m"
+    backup: Embedded in Core DB + Git-managed configuration
+    restore: Stateless web container launch + Redis session pool reconnection
+    dependencies: [core-database, core-cache]
+    failover: Horizontally scaled stateless web nodes behind AWS ALB
+    validation: Login probe, token refresh, and MFA challenge verification
+    owner: Identity & Security Engineering
+    last_tested: "2026-09-22T08:15:00Z"
+    status: CERTIFIED
+
+  - service: multi-tenancy-engine
+    name: Multi-Tenant Isolation Engine
+    tier: tier-0
+    rpo: "0m"
+    rto: "< 15m"
+    backup: Core DB tenant registry and schema partitioning
+    restore: Container startup with TenantContext resolution
+    dependencies: [core-database]
+    failover: Stateless application layer redundancy
+    validation: Cross-tenant IDOR/BOLA assertion test suite
+    owner: Core Architecture Team
+    last_tested: "2026-09-22T08:15:00Z"
+    status: CERTIFIED
+
+  - service: blob-storage
+    name: Secure Document & Asset Storage
+    tier: tier-0
+    rpo: "< 15m"
+    rto: "< 60m"
+    backup: S3 Cross-Region Replication (CRR) with Versioning and Object Lock
+    restore: S3 version recovery or regional endpoint redirection
+    dependencies: []
+    failover: Secondary region failover bucket with identical KMS key hierarchy
+    validation: SHA-256 hash comparison against database document_checksums
+    owner: Cloud Infrastructure Team
+    last_tested: "2026-09-22T08:30:00Z"
+    status: CERTIFIED
+
+  - service: core-cache
+    name: Redis Operational Cache
+    tier: tier-0
+    rpo: "< 60m"
+    rto: "< 15m"
+    backup: Hourly RDB snapshots + persistent block volume
+    restore: Redis service restart + warm cache from database
+    dependencies: []
+    failover: Redis Sentinel / Multi-AZ Replication cluster
+    validation: Cache put/get latency probe < 5ms
+    owner: SRE Team
+    last_tested: "2026-09-22T08:45:00Z"
+    status: CERTIFIED
+
+  - service: queue-broker
+    name: Background Queue & Job Distribution Engine
+    tier: tier-0
+    rpo: "< 5m"
+    rto: "< 30m"
+    backup: Redis persistent AOF logging + failed_jobs dead-letter table
+    restore: Worker process restart + failed job batch replay
+    dependencies: [core-cache, core-database]
+    failover: Auto-scaling Horizon worker cluster across availability zones
+    validation: Queue depth audit + test job execution probe
+    owner: SRE & Platform Team
+    last_tested: "2026-09-22T09:00:00Z"
+    status: CERTIFIED
+
+  - service: hcm-core
+    name: Core HCM & Employee Lifecycle
+    tier: tier-1
+    rpo: "< 15m"
+    rto: "< 60m"
+    backup: Database snapshot + document attachments
+    restore: Database restoration + scout index refresh
+    dependencies: [core-database, multi-tenancy-engine, core-auth-identity]
+    failover: Application server pool redundancy
+    validation: Employee hierarchy integrity + department counts
+    owner: HCM Engineering Team
+    last_tested: "2026-09-22T09:15:00Z"
+    status: CERTIFIED
+
+  - service: payroll-engine
+    name: Enterprise Payroll & Compensation Engine
+    tier: tier-1
+    rpo: "0m"
+    rto: "< 120m"
+    backup: Database snapshot + frozen payslip PDF archives
+    restore: Database restoration + banking export checksum verification
+    dependencies: [core-database, multi-tenancy-engine, hcm-core]
+    failover: Dedicated isolated payroll calculation workers
+    validation: Gross-to-net idempotency check + duplicate calculation prevention
+    owner: Payroll Engineering Team
+    last_tested: "2026-09-22T09:30:00Z"
+    status: CERTIFIED
+
+  - service: time-and-attendance
+    name: Time, Shift & Attendance Engine
+    tier: tier-1
+    rpo: "< 60m"
+    rto: "< 120m"
+    backup: Database snapshot + device buffer resync
+    restore: Database restoration + replay of buffered biometric device logs
+    dependencies: [core-database, multi-tenancy-engine, hcm-core]
+    failover: Dual attendance ingestion worker instances
+    validation: Punch timestamp audit + shift schedule reconciliation
+    owner: Workforce Management Team
+    last_tested: "2026-09-22T09:45:00Z"
+    status: CERTIFIED
+
+  - service: performance-appraisal
+    name: Performance Management & Goals
+    tier: tier-1
+    rpo: "< 60m"
+    rto: "< 240m"
+    backup: Database snapshot
+    restore: Database restoration
+    dependencies: [core-database, multi-tenancy-engine, hcm-core]
+    failover: Standard application pool redundancy
+    validation: Review cycle status check
+    owner: Talent Management Team
+    last_tested: "2026-09-22T10:00:00Z"
+    status: CERTIFIED
+
+  - service: recruitment-ats
+    name: Recruitment & Applicant Tracking
+    tier: tier-1
+    rpo: "< 60m"
+    rto: "< 240m"
+    backup: Database snapshot + candidate attachment store
+    restore: Database restoration + resume file integrity verification
+    dependencies: [core-database, multi-tenancy-engine, blob-storage]
+    failover: Standard application pool redundancy
+    validation: Requisition pipeline stage consistency
+    owner: Talent Acquisition Team
+    last_tested: "2026-09-22T10:15:00Z"
+    status: CERTIFIED
+
+  - service: workflow-engine
+    name: Multi-Step Approval & Workflow Engine
+    tier: tier-2
+    rpo: "< 60m"
+    rto: "< 240m"
+    backup: Database snapshot of workflow definitions and instances
+    restore: Database restoration + state machine transition validation
+    dependencies: [core-database, multi-tenancy-engine, queue-broker]
+    failover: Queue worker failover
+    validation: Active approval state machine check
+    owner: Workflow Architecture Team
+    last_tested: "2026-09-22T10:30:00Z"
+    status: CERTIFIED
+
+  - service: analytics-engine
+    name: Executive Analytics & Governed KPIs
+    tier: tier-2
+    rpo: "< 240m"
+    rto: "< 480m"
+    backup: Fully rebuildable from authoritative transactional tables
+    restore: Re-run aggregation pipelines on demand
+    dependencies: [core-database, core-cache]
+    failover: Read replica computation offload
+    validation: Headcount & labor cost metrics match source queries
+    owner: Business Intelligence Team
+    last_tested: "2026-09-22T10:45:00Z"
+    status: CERTIFIED
+
+  - service: notifications-hub
+    name: Unified Multi-Channel Notifications Hub
+    tier: tier-2
+    rpo: "< 60m"
+    rto: "< 240m"
+    backup: Database snapshot + outbound delivery logs
+    restore: Database restoration + idempotency deduplication
+    dependencies: [queue-broker, core-database]
+    failover: Alternate SMTP / SMS gateway failover
+    validation: Test notification delivery probe
+    owner: Core Platform Team
+    last_tested: "2026-09-22T11:00:00Z"
+    status: CERTIFIED
+
+  - service: realtime-broadcasting
+    name: Real-Time Event Broadcasting (Reverb)
+    tier: tier-2
+    rpo: "0m"
+    rto: "< 60m"
+    backup: Stateless WebSocket daemon
+    restore: Daemon restart via Supervisor
+    dependencies: [core-cache]
+    failover: Client-side HTTP polling fallback
+    validation: WebSocket handshake verification
+    owner: SRE Team
+    last_tested: "2026-09-22T11:15:00Z"
+    status: CERTIFIED
+
+  - service: integration-hub
+    name: Enterprise Integration & Webhook Delivery
+    tier: tier-2
+    rpo: "< 60m"
+    rto: "< 240m"
+    backup: Database snapshot of webhook logs and credentials
+    restore: Database restoration + checkpoint replay
+    dependencies: [queue-broker, core-database]
+    failover: Exponential backoff with circuit breaker
+    validation: Checkpoint reconciliation test
+    owner: Integration Engineering Team
+    last_tested: "2026-09-22T11:30:00Z"
+    status: CERTIFIED
+
+  - service: ai-concierge
+    name: HCM AI Assistant & Concierge Engine
+    tier: tier-3
+    rpo: "< 1440m"
+    rto: "< 1440m"
+    backup: Prompt versions in Git + DB use case registry
+    restore: Git deployment + circuit breaker reset
+    dependencies: [core-database, multi-tenancy-engine]
+    failover: Graceful fallback to deterministic rule engine
+    validation: Concierge query test + circuit breaker status
+    owner: AI Platform Team
+    last_tested: "2026-09-22T11:45:00Z"
+    status: CERTIFIED
+
+  - service: commercial-billing
+    name: Platform Commercial Billing & Subscriptions
+    tier: tier-3
+    rpo: "< 60m"
+    rto: "< 480m"
+    backup: Database snapshot + Stripe webhook logs
+    restore: Database restoration + Stripe event reconciliation
+    dependencies: [core-database]
+    failover: 7-day grace period maintenance
+    validation: Subscription entitlement parity check
+    owner: Finance & Commercial Operations Team
+    last_tested: "2026-09-22T12:00:00Z"
+    status: CERTIFIED

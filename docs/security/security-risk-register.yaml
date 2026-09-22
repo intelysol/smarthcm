@@ -1,0 +1,110 @@
+# Security Risk Register
+version: "1.0.0"
+last_updated: "2026-09-16"
+risk_model: "Likelihood (1-5) x Impact (1-5) = Risk Score (1-25)"
+
+risks:
+  - id: "RISK-2026-001"
+    tenant_id: null
+    domain: "Tenancy"
+    asset: "Multi-tenant database tables and cache"
+    risk: "Cross-Tenant Access / Information Bleed"
+    severity: "CRITICAL"
+    likelihood: 1
+    impact: 5
+    risk_score: 5
+    description: "User in Tenant A accesses or alters resources belonging to Tenant B."
+    mitigation: "Immutable RequestTenantContext, BelongsToTenant global query scope, and TenantIsolationTest suite."
+    owner: "Tenancy Architect"
+    status: "MITIGATED"
+    evidence: "tests/Security/TenantIsolationTest.php"
+
+  - id: "RISK-2026-002"
+    tenant_id: null
+    domain: "API Gateway"
+    asset: "REST endpoints (/api/v1/*)"
+    risk: "IDOR / Broken Object-Level Authorization (BOLA)"
+    severity: "HIGH"
+    likelihood: 2
+    impact: 4
+    risk_score: 8
+    description: "Attacker manipulates object UUIDs to fetch unowned records."
+    mitigation: "Scoped queries (where tenant_id), BasePolicy string comparison, and Gate::authorize checks."
+    owner: "API Security Lead"
+    status: "MITIGATED"
+    evidence: "tests/Security/ZeroTrustSecurityCertificationTest.php"
+
+  - id: "RISK-2026-003"
+    tenant_id: null
+    domain: "Identity"
+    asset: "User accounts and authentication sessions"
+    risk: "Credential Stuffing & Session Fixation"
+    severity: "HIGH"
+    likelihood: 2
+    impact: 4
+    risk_score: 8
+    description: "Automated brute-force attacks compromising user passwords and sessions."
+    mitigation: "Rate limiting (5 attempts/min), Bcrypt cost 12, session ID regeneration, and TOTP MFA."
+    owner: "Identity Security Lead"
+    status: "MITIGATED"
+    evidence: "tests/Security/AuthenticationTestSuiteTest.php"
+
+  - id: "RISK-2026-004"
+    tenant_id: null
+    domain: "Documents"
+    asset: "Employee contracts, medical reports, payroll slips"
+    risk: "Unauthenticated Private File Download"
+    severity: "HIGH"
+    likelihood: 1
+    impact: 4
+    risk_score: 4
+    description: "Direct guessing of private document storage paths."
+    mitigation: "Non-public storage roots, EmployeeDocumentSecurityService, and 5-minute ephemeral signed URLs."
+    owner: "Document Security Lead"
+    status: "MITIGATED"
+    evidence: "app/Domains/EmployeeDocuments/Services/EmployeeDocumentSecurityService.php"
+
+  - id: "RISK-2026-005"
+    tenant_id: null
+    domain: "Analytics & Reporting"
+    asset: "Tabular exports and spreadsheets"
+    risk: "CSV Formula Injection / DDE Execution"
+    severity: "MEDIUM"
+    likelihood: 2
+    impact: 3
+    risk_score: 6
+    description: "Injected formulas executing malicious binaries on administrative client machines."
+    mitigation: "Neutralization of dangerous triggers (=, +, -, @) by prepending single quotes."
+    owner: "Reporting Lead"
+    status: "MITIGATED"
+    evidence: "tests/Feature/Analytics/HcmReportingAndKpiGovernanceTest.php"
+
+  - id: "RISK-2026-006"
+    tenant_id: null
+    domain: "Integration Hub"
+    asset: "Inbound webhook ingress endpoints"
+    risk: "Webhook Payload Forgery & Replay Attacks"
+    severity: "HIGH"
+    likelihood: 1
+    impact: 4
+    risk_score: 4
+    description: "Attacker replays valid webhooks or sends unsigned mock transaction events."
+    mitigation: "HMAC-SHA256 signature verification, 300s timestamp window, and idempotency deduplication."
+    owner: "Integration Security Lead"
+    status: "MITIGATED"
+    evidence: "app/Domains/Integration/Services/WebhookSecurityService.php"
+
+  - id: "RISK-2026-007"
+    tenant_id: null
+    domain: "AI Governance"
+    asset: "Employee concierge and advisory assistants"
+    risk: "Indirect Prompt Injection & Unauthorized Tool Actions"
+    severity: "HIGH"
+    likelihood: 2
+    impact: 3
+    risk_score: 6
+    description: "Prompt injection causing AI to execute unauthorized state changes."
+    mitigation: "Strict separation of data vs instructions, and mandatory Human-in-the-Loop confirmation."
+    owner: "AI Governance Lead"
+    status: "MITIGATED"
+    evidence: "tests/Security/AiGovernanceSafetyTest.php"

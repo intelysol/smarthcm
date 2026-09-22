@@ -256,8 +256,8 @@
                         <div class="flex items-center justify-between pt-1">
                             <span class="text-xs text-slate-500">Domain: {{ $d['source_domain'] }}</span>
                             <div class="space-x-2">
-                                <button class="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-600 hover:bg-emerald-500 text-white">Approve</button>
-                                <button class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Reject</button>
+                                <button onclick="handleDecisionAction(this, '{{ $d['id'] }}', 'approve')" class="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-600 hover:bg-emerald-500 text-white transition">Approve</button>
+                                <button onclick="handleDecisionAction(this, '{{ $d['id'] }}', 'reject')" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Reject</button>
                             </div>
                         </div>
                     </div>
@@ -268,5 +268,33 @@
             </div>
         </div>
     </main>
+
+    <script>
+        async function handleDecisionAction(btn, decisionId, action) {
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = '...';
+
+            try {
+                const res = await fetch(`/api/hcm/workforce-intelligence/decisions/${decisionId}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ action })
+                });
+                const card = btn.closest('.rounded-lg');
+                if (card) {
+                    card.classList.add('opacity-40', 'pointer-events-none');
+                    setTimeout(() => card.remove(), 400);
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+    </script>
 </body>
 </html>

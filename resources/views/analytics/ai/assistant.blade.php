@@ -81,7 +81,11 @@ document.getElementById('askAiBtn').addEventListener('click', async function() {
         document.getElementById('aiCitedSources').innerText = 'Data Sources: ' + (data.data_sources_cited || []).join(', ');
         document.getElementById('aiResponseCard').classList.remove('hidden');
     } catch (err) {
-        alert('Failed to process AI analytical inquiry.');
+        document.getElementById('aiExplanationText').innerText = 'Unable to reach the AI analytics engine. Please verify your query parameters or retry shortly.';
+        document.getElementById('aiResponseCard').classList.remove('hidden');
+        if (window.showNotification) {
+            window.showNotification('error', 'Failed to process AI analytical inquiry.');
+        }
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<span>Ask AI</span><i class="fa-solid fa-arrow-right ml-2"></i>';

@@ -1,0 +1,115 @@
+# Enterprise Application Platform — High-Frequency Query Performance Registry
+# Version: 2.77.0
+# Last Updated: 2026-09-22
+
+queries:
+  # HCM Core & Employee Directory
+  - id: qry-emp-directory-list
+    domain: Core HCM
+    purpose: Paginated employee directory listing with department and position relations
+    frequency: High (500 req/s peak)
+    sql_signature: "SELECT * FROM employees WHERE tenant_id = ? AND status = 'active' ORDER BY last_name ASC LIMIT 25 OFFSET ?"
+    baseline_ms: 45.2
+    target_ms: 15.0
+    measured_ms: 8.4
+    rows_examined_avg: 25
+    indexes: ["idx_emp_tenant_status_name(tenant_id, status, last_name)"]
+    owner: HCM Domain Owner
+    status: OPTIMIZED
+
+  - id: qry-emp-profile-eager
+    domain: Core HCM
+    purpose: Single employee full profile hydration with contact, position, department, and manager
+    frequency: High (350 req/s peak)
+    sql_signature: "SELECT * FROM employees e LEFT JOIN positions p ON e.position_id = p.id WHERE e.id = ? AND e.tenant_id = ?"
+    baseline_ms: 38.0
+    target_ms: 10.0
+    measured_ms: 4.8
+    rows_examined_avg: 1
+    indexes: ["PRIMARY(id)", "idx_emp_tenant_id(tenant_id)"]
+    owner: HCM Domain Owner
+    status: OPTIMIZED
+
+  # Time, Shifts & Attendance
+  - id: qry-attendance-daily-punch
+    domain: Attendance
+    purpose: Daily clock-in/out retrieval and shift reconciliation for active roster
+    frequency: High (1200 req/s morning peak)
+    sql_signature: "SELECT * FROM attendance_punches WHERE tenant_id = ? AND employee_id = ? AND punch_time >= ? ORDER BY punch_time ASC"
+    baseline_ms: 120.5
+    target_ms: 25.0
+    measured_ms: 12.1
+    rows_examined_avg: 4
+    indexes: ["idx_punch_tenant_emp_time(tenant_id, employee_id, punch_time)"]
+    owner: Attendance Domain Owner
+    status: OPTIMIZED
+
+  # Payroll & Compensation
+  - id: qry-payroll-active-batch
+    domain: Payroll
+    purpose: Gross-to-net calculation batch candidate retrieval for payroll period
+    frequency: Medium (Batch execution)
+    sql_signature: "SELECT e.id, e.salary, e.tax_bracket FROM employees e WHERE e.tenant_id = ? AND e.status = 'active'"
+    baseline_ms: 210.0
+    target_ms: 50.0
+    measured_ms: 28.5
+    rows_examined_avg: 1000
+    indexes: ["idx_emp_tenant_status(tenant_id, status)"]
+    owner: Payroll Domain Owner
+    status: OPTIMIZED
+
+  # Approvals & Multi-Step Workflows
+  - id: qry-workflow-pending-approvals
+    domain: Workflow
+    purpose: Fetch pending approval requests for current authenticated manager
+    frequency: High (400 req/s peak)
+    sql_signature: "SELECT * FROM workflow_instances WHERE tenant_id = ? AND approver_id = ? AND status = 'pending' ORDER BY created_at DESC"
+    baseline_ms: 85.0
+    target_ms: 20.0
+    measured_ms: 9.6
+    rows_examined_avg: 12
+    indexes: ["idx_wf_tenant_approver_status(tenant_id, approver_id, status)"]
+    owner: Workflow Domain Owner
+    status: OPTIMIZED
+
+  # Executive Analytics & Governed KPIs
+  - id: qry-analytics-headcount-trend
+    domain: Analytics
+    purpose: Monthly headcount aggregation by business unit and location
+    frequency: Medium (Cached 1h)
+    sql_signature: "SELECT department_id, COUNT(*) as count FROM employees WHERE tenant_id = ? AND status = 'active' GROUP BY department_id"
+    baseline_ms: 145.0
+    target_ms: 30.0
+    measured_ms: 14.2
+    rows_examined_avg: 250
+    indexes: ["idx_emp_tenant_dept_status(tenant_id, department_id, status)"]
+    owner: Business Intelligence Owner
+    status: OPTIMIZED
+
+  # Document & Asset Records
+  - id: qry-documents-tenant-search
+    domain: Documents
+    purpose: Filtered document registry listing by employee and category
+    frequency: Medium (150 req/s)
+    sql_signature: "SELECT * FROM employee_documents WHERE tenant_id = ? AND employee_id = ? AND category = ? ORDER BY created_at DESC"
+    baseline_ms: 65.0
+    target_ms: 20.0
+    measured_ms: 7.9
+    rows_examined_avg: 8
+    indexes: ["idx_docs_tenant_emp_cat(tenant_id, employee_id, category)"]
+    owner: Document Management Owner
+    status: OPTIMIZED
+
+  # Multi-Tenant Auth & Permissions
+  - id: qry-auth-user-tenant-context
+    domain: Identity
+    purpose: User authentication resolution with tenant status, roles, and permissions
+    frequency: Extreme (3000 req/s peak)
+    sql_signature: "SELECT u.*, t.status as tenant_status FROM users u JOIN tenants t ON u.tenant_id = t.id WHERE u.email = ? LIMIT 1"
+    baseline_ms: 28.0
+    target_ms: 8.0
+    measured_ms: 3.2
+    rows_examined_avg: 1
+    indexes: ["users_email_unique(email)", "PRIMARY(id)"]
+    owner: Security & Identity Owner
+    status: OPTIMIZED

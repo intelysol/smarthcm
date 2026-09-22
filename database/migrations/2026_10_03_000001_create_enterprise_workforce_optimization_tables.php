@@ -42,7 +42,7 @@ return new class extends Migration
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
                 $table->foreign('model_id')->references('id')->on('hcm_workforce_optimization_models')->cascadeOnDelete();
-                $table->unique(['model_id', 'version']);
+                $table->unique(['model_id', 'version'], 'hcm_wf_opt_model_ver_model_ver_unique');
             });
         }
 
@@ -141,13 +141,13 @@ return new class extends Migration
                 $table->uuid('id')->primary();
                 $table->uuid('tenant_id')->index();
                 $table->uuid('opportunity_id')->index();
-                $table->string('recommendation_code', 64)->unique();
+                $table->string('recommendation_code', 64)->unique('hcm_wf_opt_rec_code_unique');
                 $table->string('action_type', 50); // HIRE, REDEPLOY, RESKILL, TRAIN, CONTRACT, REDESIGN_SHIFT, REDUCE_OVERTIME, REALLOCATE_WORK, AUTOMATE, RELOCATE, REPLACE, DELAY_HIRING, ACCELERATE_HIRING
                 $table->string('title', 180);
                 $table->text('executive_summary');
-                $table->uuid('source_department_id')->nullable()->index();
-                $table->uuid('target_department_id')->nullable()->index();
-                $table->uuid('candidate_employee_id')->nullable()->index();
+                $table->uuid('source_department_id')->nullable()->index('hcm_wf_opt_rec_src_dept_idx');
+                $table->uuid('target_department_id')->nullable()->index('hcm_wf_opt_rec_tgt_dept_idx');
+                $table->uuid('candidate_employee_id')->nullable()->index('hcm_wf_opt_rec_cand_emp_idx');
                 $table->decimal('decision_score', 5, 2)->default(85.00); // 0 - 100
                 $table->decimal('cost_impact', 14, 4)->default(0);
                 $table->decimal('capacity_impact_hours', 10, 2)->default(0);
@@ -164,8 +164,8 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('opportunity_id')->references('id')->on('hcm_workforce_optimization_opportunities')->cascadeOnDelete();
-                $table->foreign('candidate_employee_id')->references('id')->on('employees')->nullOnDelete();
+                $table->foreign('opportunity_id', 'fk_wf_opt_rec_opp_id')->references('id')->on('hcm_workforce_optimization_opportunities')->cascadeOnDelete();
+                $table->foreign('candidate_employee_id', 'fk_wf_opt_rec_cand_emp_id')->references('id')->on('employees')->nullOnDelete();
             });
         }
 
@@ -173,8 +173,8 @@ return new class extends Migration
         if (! Schema::hasTable('hcm_workforce_optimization_recommendation_factors')) {
             Schema::create('hcm_workforce_optimization_recommendation_factors', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
-                $table->uuid('tenant_id')->index();
-                $table->uuid('recommendation_id')->index();
+                $table->uuid('tenant_id')->index('hcm_wf_opt_rec_fac_tenant_idx');
+                $table->uuid('recommendation_id')->index('hcm_wf_opt_rec_fac_rec_idx');
                 $table->string('factor_type', 50); // objective_alignment, constraint_compliance, risk_indicator, trade_off, assumption
                 $table->string('name', 150);
                 $table->decimal('score', 5, 2)->default(0);
@@ -182,8 +182,8 @@ return new class extends Migration
                 $table->text('details')->nullable();
                 $table->timestamps();
 
-                $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('recommendation_id')->references('id')->on('hcm_workforce_optimization_recommendations')->cascadeOnDelete();
+                $table->foreign('tenant_id', 'fk_wf_opt_rec_fac_tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+                $table->foreign('recommendation_id', 'fk_wf_opt_rec_fac_rec_id')->references('id')->on('hcm_workforce_optimization_recommendations')->cascadeOnDelete();
             });
         }
 
@@ -233,8 +233,8 @@ return new class extends Migration
         if (! Schema::hasTable('hcm_workforce_optimization_actions')) {
             Schema::create('hcm_workforce_optimization_actions', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
-                $table->uuid('tenant_id')->index();
-                $table->uuid('recommendation_id')->index();
+                $table->uuid('tenant_id')->index('hcm_wf_opt_act_tenant_idx');
+                $table->uuid('recommendation_id')->index('hcm_wf_opt_act_rec_idx');
                 $table->string('action_number', 64)->unique();
                 $table->string('title', 180);
                 $table->string('target_module', 64); // core_hr, recruitment, learning, scheduling
@@ -278,8 +278,8 @@ return new class extends Migration
         if (! Schema::hasTable('hcm_workforce_optimization_feedback')) {
             Schema::create('hcm_workforce_optimization_feedback', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
-                $table->uuid('tenant_id')->index();
-                $table->uuid('recommendation_id')->index();
+                $table->uuid('tenant_id')->index('hcm_wf_opt_fb_tenant_idx');
+                $table->uuid('recommendation_id')->index('hcm_wf_opt_fb_rec_idx');
                 $table->string('feedback_type', 50); // APPROVED, REJECTED, NOT_FEASIBLE, ALREADY_IMPLEMENTED, INCORRECT_DATA, LOW_VALUE, HIGH_RISK
                 $table->text('reason')->nullable();
                 $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();

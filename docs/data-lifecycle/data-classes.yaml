@@ -1,0 +1,56 @@
+version: "1.0"
+updated_at: "2026-09-22T08:45:00Z"
+data_classes:
+  - id: PUBLIC
+    name: "Public Information"
+    description: "Public directory entries, published company policies, public job postings"
+    classification: "PUBLIC"
+    confidentiality: "Low"
+    encryption_at_rest: optional
+    default_retention_days: 1095 # 3 years
+    audit_on_access: false
+
+  - id: INTERNAL
+    name: "Internal Operational Data"
+    description: "Internal team schedules, department announcements, organizational charts"
+    classification: "INTERNAL"
+    confidentiality: "Moderate"
+    encryption_at_rest: required
+    default_retention_days: 1825 # 5 years
+    audit_on_access: false
+
+  - id: CONFIDENTIAL
+    name: "Confidential Business Data"
+    description: "Workforce headcount plans, salary bands, vendor contracts, internal audits"
+    classification: "CONFIDENTIAL"
+    confidentiality: "High"
+    encryption_at_rest: required
+    default_retention_days: 2555 # 7 years
+    audit_on_access: true
+
+  - id: SENSITIVE
+    name: "Sensitive PII Data"
+    description: "Employee home addresses, emergency contacts, performance evaluations, leave reasons"
+    classification: "SENSITIVE"
+    confidentiality: "High"
+    encryption_at_rest: required
+    default_retention_days: 2555 # 7 years post-employment
+    audit_on_access: true
+
+  - id: HIGHLY_SENSITIVE
+    name: "Highly Sensitive Financial & Health Data"
+    description: "Bank account numbers, national IDs, tax withholding details, payroll calculation records, medical clearances"
+    classification: "HIGHLY_SENSITIVE"
+    confidentiality: "Critical"
+    encryption_at_rest: required
+    default_retention_days: 3650 # 10 years
+    audit_on_access: true
+
+  - id: SECURITY_CRITICAL
+    name: "Security Critical & Forensic Data"
+    description: "Authentication logs, security alerts, encryption key access records, immutable audit logs"
+    classification: "SECURITY_CRITICAL"
+    confidentiality: "Maximum"
+    encryption_at_rest: required
+    default_retention_days: 2555 # 7 years
+    audit_on_access: true

@@ -35,6 +35,21 @@ class ComplianceRequirementController extends Controller
         ]);
     }
 
+    public function show(Request $request, string $id): JsonResponse
+    {
+        $tenantId = $request->user()->tenant_id ?? $request->query('tenant_id');
+        $query = \App\Domains\Compliance\Models\HcmComplianceRequirement::with(['type', 'legalEntity', 'department', 'position']);
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+        $requirement = $query->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => $requirement,
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

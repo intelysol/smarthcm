@@ -60,7 +60,7 @@ return new class extends Migration
             $table->date('expiry_date')->nullable()->index();
             $table->string('status', 30)->default('submitted')->index();
             $table->string('verification_status', 30)->default('pending')->index();
-            $table->uuid('verified_by')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->string('rejection_reason', 255)->nullable();
             $table->string('confidentiality_level', 30)->default('HR')->index();
@@ -93,7 +93,7 @@ return new class extends Migration
             $table->string('waiver_reason', 255)->nullable();
             $table->timestamps();
 
-            $table->unique(['employee_id', 'document_type_id']);
+            $table->unique(['employee_id', 'document_type_id'], 'emp_doc_req_emp_doc_type_unique');
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             $table->foreign('document_type_id')->references('id')->on('hcm_document_types')->cascadeOnDelete();
             $table->foreign('employee_document_id')->references('id')->on('hcm_employee_documents')->nullOnDelete();
@@ -104,7 +104,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
             $table->uuid('employee_document_id')->index();
-            $table->uuid('reviewer_id')->index();
+            $table->foreignId('reviewer_id')->constrained('users')->cascadeOnDelete();
             $table->string('decision', 30); // verified, rejected
             $table->string('reason', 255)->nullable();
             $table->integer('version')->default(1);
@@ -112,7 +112,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('employee_document_id')->references('id')->on('hcm_employee_documents')->cascadeOnDelete();
-            $table->foreign('reviewer_id')->references('id')->on('users')->cascadeOnDelete();
         });
 
         // 6. Employee Document Requests
@@ -121,7 +120,7 @@ return new class extends Migration
             $table->uuid('tenant_id')->index();
             $table->uuid('employee_id')->index();
             $table->uuid('document_type_id')->index();
-            $table->uuid('requested_by')->index();
+            $table->foreignId('requested_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('requested_at');
             $table->date('due_date')->nullable();
             $table->string('status', 30)->default('requested')->index();
@@ -132,7 +131,6 @@ return new class extends Migration
 
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             $table->foreign('document_type_id')->references('id')->on('hcm_document_types')->cascadeOnDelete();
-            $table->foreign('requested_by')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('employee_document_id')->references('id')->on('hcm_employee_documents')->nullOnDelete();
         });
 
@@ -162,7 +160,7 @@ return new class extends Migration
             $table->boolean('notified')->default(false);
             $table->timestamps();
 
-            $table->unique(['employee_document_id', 'milestone']);
+            $table->unique(['employee_document_id', 'milestone'], 'emp_doc_exp_doc_milestone_unique');
             $table->foreign('employee_document_id')->references('id')->on('hcm_employee_documents')->cascadeOnDelete();
         });
 
@@ -172,7 +170,7 @@ return new class extends Migration
             $table->uuid('tenant_id')->index();
             $table->string('batch_number', 50)->unique();
             $table->uuid('document_type_id')->index();
-            $table->uuid('uploaded_by')->index();
+            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
             $table->integer('total_items')->default(0);
             $table->integer('valid_items')->default(0);
             $table->integer('warning_items')->default(0);
@@ -182,7 +180,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('document_type_id')->references('id')->on('hcm_document_types')->cascadeOnDelete();
-            $table->foreign('uploaded_by')->references('id')->on('users')->cascadeOnDelete();
         });
 
         // 10. Employee Document Bulk Items
@@ -208,7 +205,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
             $table->uuid('employee_document_id')->nullable()->index();
-            $table->uuid('actor_id')->nullable()->index();
+            $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('event_name', 50)->index();
             $table->json('old_state')->nullable();
             $table->json('new_state')->nullable();
@@ -217,7 +214,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('employee_document_id')->references('id')->on('hcm_employee_documents')->nullOnDelete();
-            $table->foreign('actor_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 

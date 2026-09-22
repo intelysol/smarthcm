@@ -107,7 +107,7 @@ return new class extends Migration {
             $table->timestamp('calculated_at');
             $table->timestamps();
 
-            $table->unique(['tenant_id', 'snapshot_type', 'snapshot_date']);
+            $table->unique(['tenant_id', 'snapshot_type', 'snapshot_date'], 'hcm_analytics_snap_type_date_unique');
         });
 
         Schema::create('hcm_analytics_snapshot_runs', function (Blueprint $table) {

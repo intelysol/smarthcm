@@ -23,6 +23,8 @@
         "psr-4": {
             "App\\": "app/",
             "Flow\\Packages\\": "packages/",
+            "Flow\\Packages\\Integrations\\": "packages/integrations/",
+            "Flow\\Packages\\Integration\\": "packages/integrations/",
             "Flow\\Modules\\": "modules/",
             "Flow\\Identity\\": "packages/identity/",
             "Database\\Factories\\": "database/factories/",

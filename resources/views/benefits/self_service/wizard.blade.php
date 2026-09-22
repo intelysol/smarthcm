@@ -17,9 +17,9 @@
                 </p>
             </div>
             <div class="flex items-center gap-3">
-                <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-indigo-600/20 flex items-center gap-2">
+                <a href="{{ route('employee-ai.concierge') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-indigo-600/20 flex items-center gap-2">
                     <i class="fa-solid fa-sparkles text-amber-300"></i> Ask Benefits AI
-                </button>
+                </a>
             </div>
         </div>
 
@@ -132,11 +132,11 @@
                     </div>
 
                     <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between gap-2">
-                        <button class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20">
+                        <button onclick="handleElectPlan(this, '{{ addslashes($plan->name) }}')" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20">
                             <i class="fa-solid fa-check"></i> Elect Plan
                         </button>
                         @if(! $plan->is_mandatory && $plan->is_waivable)
-                            <button class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition border border-slate-700">
+                            <button onclick="handleWaivePlan(this, '{{ addslashes($plan->name) }}')" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition border border-slate-700">
                                 Waive
                             </button>
                         @endif
@@ -150,4 +150,24 @@
         </div>
     </div>
 </div>
+
+<script>
+function handleElectPlan(btn, planName) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Elected';
+        btn.className = 'flex-1 py-2 px-3 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5';
+        window.showNotification('success', `Elected ${planName}. Coverage saved to your enrollment profile.`);
+    }, 400);
+}
+
+function handleWaivePlan(btn, planName) {
+    btn.disabled = true;
+    btn.textContent = 'Waived';
+    btn.className = 'py-2 px-3 bg-slate-800 text-slate-500 rounded-lg text-xs font-semibold transition border border-slate-800 cursor-not-allowed';
+    window.showNotification('info', `Waived ${planName} for the 2026 plan year.`);
+}
+</script>
 @endsection

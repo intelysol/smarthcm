@@ -1,0 +1,81 @@
+import { NavigationItem } from './index';
+
+export const hrNavigation: NavigationItem[] = [
+    {
+        id: 'hr.dashboard',
+        label: 'HR Command Center',
+        icon: 'fa-solid fa-tower-broadcast',
+        route: '/hr/dashboard',
+        permission: 'hr.dashboard.view',
+    },
+    {
+        id: 'hr.workforce',
+        label: 'People Directory',
+        icon: 'fa-solid fa-users',
+        route: '/portal/directory',
+        permission: 'employees.view',
+    },
+    {
+        id: 'hr.recruitment',
+        label: 'Recruitment & Jobs',
+        icon: 'fa-solid fa-user-plus',
+        route: '/recruitment/requisitions',
+        permission: 'recruitment.manage',
+    },
+    {
+        id: 'hr.onboarding',
+        label: 'Onboarding',
+        icon: 'fa-solid fa-door-open',
+        route: '/onboarding/programs',
+        permission: 'onboarding.manage',
+    },
+    {
+        id: 'hr.attendance',
+        label: 'Time & Attendance',
+        icon: 'fa-solid fa-clock',
+        route: '/hcm/attendance',
+        permission: 'attendance.manage',
+    },
+    {
+        id: 'hr.payroll',
+        label: 'Payroll & Compensation',
+        icon: 'fa-solid fa-file-invoice-dollar',
+        route: '/payroll',
+        permission: 'payroll.manage',
+    },
+    {
+        id: 'hr.benefits',
+        label: 'Benefits & Health',
+        icon: 'fa-solid fa-heart-pulse',
+        route: '/benefits/programs',
+        permission: 'benefits.manage',
+    },
+    {
+        id: 'hr.expenses',
+        label: 'Expenses Management',
+        icon: 'fa-solid fa-receipt',
+        route: '/expenses/claims',
+        permission: 'expenses.manage',
+    },
+    {
+        id: 'hr.performance',
+        label: 'Performance & Goals',
+        icon: 'fa-solid fa-bullseye',
+        route: '/performance/cycles',
+        permission: 'performance.manage',
+    },
+    {
+        id: 'hr.learning',
+        label: 'Learning & Training',
+        icon: 'fa-solid fa-graduation-cap',
+        route: '/learning/catalog',
+        permission: 'learning.manage',
+    },
+    {
+        id: 'hr.cases',
+        label: 'Employee Relations',
+        icon: 'fa-solid fa-handshake-angle',
+        route: '/employee-relations/cases',
+        permission: 'employee_relations.manage',
+    },
+];

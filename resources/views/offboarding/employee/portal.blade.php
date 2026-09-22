@@ -88,8 +88,8 @@
                                 <i class="fa-solid fa-file-pdf text-rose-500 text-base"></i>
                                 <span class="font-medium text-slate-900">{{ $doc->title }}</span>
                             </div>
-                            <a href="#" class="px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
-                                Download
+                            <a href="/api/v1/documents/{{ $doc->id }}/download" class="px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition flex items-center space-x-1">
+                                <i class="fa-solid fa-download mr-1"></i> Download
                             </a>
                         </div>
                     @empty

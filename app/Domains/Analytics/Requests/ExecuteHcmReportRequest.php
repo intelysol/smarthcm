@@ -20,6 +20,7 @@ class ExecuteHcmReportRequest extends FormRequest
             'filters' => 'nullable|array',
             'grouping' => 'nullable|array',
             'format' => 'nullable|string|in:json,csv,pdf,xlsx',
+            'raw_records' => 'nullable|boolean',
         ];
     }
 }

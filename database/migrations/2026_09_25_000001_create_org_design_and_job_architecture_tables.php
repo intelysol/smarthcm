@@ -131,7 +131,7 @@ return new class extends Migration {
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
                 $table->foreign('job_profile_id')->references('id')->on('job_profiles')->cascadeOnDelete();
-                $table->unique(['tenant_id', 'job_profile_id', 'version_number']);
+                $table->unique(['tenant_id', 'job_profile_id', 'version_number'], 'job_prof_ver_prof_ver_unique');
             });
         }
 

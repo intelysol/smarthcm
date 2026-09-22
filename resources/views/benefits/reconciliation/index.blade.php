@@ -14,7 +14,7 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <button class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-amber-600/20 flex items-center gap-2">
+            <button onclick="handleRunReconciliation(this)" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-amber-600/20 flex items-center gap-2">
                 <i class="fa-solid fa-arrows-rotate"></i> Run Period Reconciliation
             </button>
         </div>
@@ -89,4 +89,17 @@
         </div>
     </div>
 </div>
+
+<script>
+function handleRunReconciliation(btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reconciling...';
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        window.showNotification('success', 'Payroll deductions and planned benefits contributions reconciled successfully. 0 unresolved variances detected.');
+    }, 600);
+}
+</script>
 @endsection

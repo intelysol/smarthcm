@@ -38,7 +38,7 @@ return new class extends Migration {
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('template_id')->references('id')->on('hcm_onboarding_templates')->cascadeOnDelete();
-            $table->unique(['template_id', 'version_number']);
+            $table->unique(['template_id', 'version_number'], 'hcm_onb_tmpl_ver_tmpl_num_unique');
         });
 
         // 3. Template Tasks Definition
@@ -200,7 +200,7 @@ return new class extends Migration {
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('case_id')->references('id')->on('hcm_onboarding_cases')->cascadeOnDelete();
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->unique(['case_id', 'policy_code', 'policy_version']);
+            $table->unique(['case_id', 'policy_code', 'policy_version'], 'hcm_onb_pol_ack_case_pol_ver_unique');
         });
 
         // 10. Provisioning Requests (IT Hardware, System Access, Facilities)

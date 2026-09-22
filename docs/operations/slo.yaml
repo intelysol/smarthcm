@@ -1,0 +1,98 @@
+# Enterprise Application Platform — Service Level Objectives (SLOs)
+# Version: 2.75.0
+# Last Updated: 2026-09-22
+
+slos:
+  - id: slo-platform-availability
+    name: Platform HTTP API Availability
+    sli: Ratio of successful HTTP requests (2xx, 3xx, 4xx except 429) to total incoming requests
+    target_percentage: 99.9
+    measurement_window: 30d
+    error_budget_percentage: 0.1
+    error_budget_downtime_minutes: 43.8
+    severity_if_breached: SEV-1
+    burn_rate_alerts:
+      - rate: 14.4x
+        window: 1h
+        budget_consumed: 2%
+        severity: critical
+      - rate: 6.0x
+        window: 6h
+        budget_consumed: 5%
+        severity: high
+      - rate: 1.0x
+        window: 3d
+        budget_consumed: 10%
+        severity: medium
+
+  - id: slo-api-latency
+    name: Web & API Gateway Latency
+    sli: p95 duration of successful HTTP API requests across all tenant endpoints
+    target_threshold_ms: 200
+    target_percentage: 95.0
+    measurement_window: 7d
+    severity_if_breached: SEV-2
+    burn_rate_alerts:
+      - rate: 5.0x
+        window: 30m
+        severity: high
+
+  - id: slo-db-availability
+    name: Core Database Connectivity & Query Latency
+    sli: Ratio of successful queries and p99 query duration < 50ms
+    target_percentage: 99.99
+    measurement_window: 30d
+    severity_if_breached: SEV-0
+    burn_rate_alerts:
+      - rate: 10.0x
+        window: 5m
+        severity: critical
+
+  - id: slo-cache-latency
+    name: Redis Operational Cache Latency
+    sli: p99 read/write operation latency < 5ms
+    target_percentage: 99.9
+    measurement_window: 7d
+    severity_if_breached: SEV-2
+
+  - id: slo-queue-ingestion
+    name: Background Queue Job Processing Delay
+    sli: Duration between job dispatch and worker execution start < 5.0s
+    target_percentage: 98.0
+    measurement_window: 24h
+    severity_if_breached: SEV-2
+
+  - id: slo-payroll-processing
+    name: Payroll Calculation Batch Run Performance
+    sli: Total gross-to-net computation time per 1,000 employees < 30.0s
+    target_percentage: 99.0
+    measurement_window: 30d
+    severity_if_breached: SEV-2
+
+  - id: slo-attendance-punch
+    name: Biometric & Mobile Attendance Punch Latency
+    sli: p95 ingestion-to-acknowledgement duration < 500ms
+    target_percentage: 99.5
+    measurement_window: 7d
+    severity_if_breached: SEV-2
+
+  - id: slo-realtime-delivery
+    name: Real-Time Event WebSocket Dispatch (Reverb)
+    sli: Duration from server event broadcast to client WebSocket reception < 500ms
+    target_percentage: 98.0
+    measurement_window: 7d
+    severity_if_breached: SEV-3
+
+  - id: slo-webhook-delivery
+    name: Outbound Integration Webhook Delivery Success
+    sli: Ratio of 2xx acknowledgements from valid partner endpoints within 3 retries
+    target_percentage: 99.5
+    measurement_window: 7d
+    severity_if_breached: SEV-3
+
+  - id: slo-ai-latency
+    name: AI Assistant Response Latency
+    sli: p90 time-to-first-token < 2000ms with fallback to deterministic responses on failure
+    target_percentage: 95.0
+    measurement_window: 7d
+    severity_if_breached: SEV-3

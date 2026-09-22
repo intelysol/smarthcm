@@ -107,7 +107,7 @@ return new class extends Migration
             $table->uuid('assigned_steward_id')->nullable();
             $table->string('root_cause_category')->nullable(); // SOURCE_SYSTEM, INTEGRATION, MAPPING, MANUAL_ENTRY, CONFIGURATION
             $table->text('root_cause_explanation')->nullable();
-            $table->uuid('resolved_by_user_id')->nullable();
+            $table->foreignId('resolved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('resolved_at')->nullable();
             $table->timestamp('due_at')->nullable();
             $table->timestamps();
@@ -123,7 +123,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
             $table->uuid('issue_id');
-            $table->uuid('approved_by_user_id');
+            $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->text('justification');
             $table->timestamp('valid_until');
             $table->string('status')->default('ACTIVE'); // ACTIVE, EXPIRED, REVOKED
@@ -138,21 +138,21 @@ return new class extends Migration
         Schema::create('hcm_gov_master_mappings', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->string('entity_type'); // DEPARTMENT, COST_CENTER, JOB, LOCATION, EMPLOYEE
-            $table->string('source_system'); // SAP, WORKDAY, NETSUITE, PAYROLL_ADP, HCM_CORE
-            $table->string('source_id');
-            $table->string('source_code');
-            $table->string('target_system')->default('HCM_CORE');
-            $table->string('target_id');
-            $table->string('target_code');
+            $table->string('entity_type', 60); // DEPARTMENT, COST_CENTER, JOB, LOCATION, EMPLOYEE
+            $table->string('source_system', 60); // SAP, WORKDAY, NETSUITE, PAYROLL_ADP, HCM_CORE
+            $table->string('source_id', 100);
+            $table->string('source_code', 100);
+            $table->string('target_system', 60)->default('HCM_CORE');
+            $table->string('target_id', 100);
+            $table->string('target_code', 100);
             $table->string('mapping_status')->default('MAPPED'); // UNMAPPED, MAPPED, AMBIGUOUS, CONFLICT, RETIRED, PENDING_REVIEW
             $table->date('effective_from');
             $table->date('effective_to')->nullable();
-            $table->uuid('verified_by_user_id')->nullable();
+            $table->foreignId('verified_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->index(['tenant_id', 'entity_type', 'mapping_status']);
+            $table->index(['tenant_id', 'entity_type', 'mapping_status'], 'hcm_gov_mst_map_t_ent_stat_idx');
             $table->unique(['tenant_id', 'entity_type', 'source_system', 'source_code'], 'uniq_master_mapping');
         });
 
@@ -208,7 +208,7 @@ return new class extends Migration
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('source_node_id')->references('id')->on('hcm_gov_lineage_nodes')->cascadeOnDelete();
             $table->foreign('target_node_id')->references('id')->on('hcm_gov_lineage_nodes')->cascadeOnDelete();
-            $table->index(['tenant_id', 'source_node_id', 'target_node_id']);
+            $table->index(['tenant_id', 'source_node_id', 'target_node_id'], 'hcm_gov_lin_edg_t_src_tgt_idx');
         });
 
         // 9. Central Governed KPI Registry & Certification
@@ -227,13 +227,13 @@ return new class extends Migration
             $table->integer('version')->default(1);
             $table->string('lifecycle_status')->default('PUBLISHED'); // DRAFT, BUSINESS_REVIEW, TECHNICAL_REVIEW, APPROVED, PUBLISHED, DEPRECATED, RETIRED
             $table->string('certification_status')->default('UNCERTIFIED'); // CERTIFIED, UNCERTIFIED, UNDER_REVIEW, DEPRECATED
-            $table->uuid('certified_by_user_id')->nullable();
+            $table->foreignId('certified_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('certified_at')->nullable();
             $table->string('security_classification')->default('INTERNAL');
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->index(['tenant_id', 'certification_status', 'lifecycle_status']);
+            $table->index(['tenant_id', 'certification_status', 'lifecycle_status'], 'hcm_gov_kpi_reg_t_cert_stat_idx');
         });
 
         // 10. Data Contracts & Monitoring
@@ -259,7 +259,7 @@ return new class extends Migration
         Schema::create('hcm_gov_audits', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('action'); // QUALITY_RUN, RULE_CHANGE, ISSUE_RESOLVED, EXCEPTION_APPROVED, MAPPING_UPDATED, KPI_CERTIFIED, CONTRACT_PUBLISHED
             $table->string('target_entity_type')->nullable();
             $table->string('target_entity_id')->nullable();

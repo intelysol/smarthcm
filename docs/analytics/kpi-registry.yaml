@@ -1,0 +1,283 @@
+# Enterprise HCM KPI Registry
+# Authoritative Governed Metric Dictionary
+version: "1.0"
+governance_policy: "EPIC-2.73-GOVERNED-METRIC-SPEC"
+last_certified: "2026-09-16"
+
+kpis:
+  # ==========================================
+  # 1. HEADCOUNT & WORKFORCE DEMOGRAPHICS
+  # ==========================================
+  - kpi_id: "KPI-HC-001"
+    name: "Total Headcount"
+    definition: "Total number of distinct employees with joining_date <= as_of_date and (termination_date is null or termination_date > as_of_date) regardless of leave or contract status."
+    business_owner: "Core HR"
+    data_owner: "Core HR Domain"
+    calculation: "COUNT(DISTINCT employee_id) WHERE joining_date <= as_of_date AND (termination_date IS NULL OR termination_date > as_of_date)"
+    unit: "count"
+    dimensions: ["department", "branch", "business_unit", "job_grade", "employment_type"]
+    filters: ["company_id", "department_id", "branch_id", "employment_status"]
+    source: "employees"
+    freshness: "real-time"
+    aggregation: "sum"
+    effective_date: "2025-01-01"
+    version: 2
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-HC-002"
+    name: "Full-Time Equivalent (FTE)"
+    definition: "Aggregated workforce capacity normalized by standard full-time working hours (e.g. 1.0 for Full-Time, 0.5 for Part-Time, or actual contracted FTE weight)."
+    business_owner: "Workforce Planning"
+    data_owner: "Core HR & Job Architecture"
+    calculation: "SUM(CASE WHEN employment_type = 'PART_TIME' THEN 0.5 WHEN employment_type = 'FULL_TIME' THEN 1.0 ELSE fte END)"
+    unit: "fte"
+    dimensions: ["department", "location", "cost_center", "business_unit"]
+    filters: ["department_id", "employment_status"]
+    source: "employees JOIN positions ON employees.current_position_id = positions.id"
+    freshness: "real-time"
+    aggregation: "sum"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-HC-003"
+    name: "Active Employees"
+    definition: "Employees actively working and not currently on extended inactive leave, notice period, or suspension."
+    business_owner: "Core HR"
+    data_owner: "Core HR Domain"
+    calculation: "COUNT(employee_id) WHERE employment_status = 'active'"
+    unit: "count"
+    dimensions: ["department", "branch", "job_family"]
+    filters: ["employment_status = 'active'"]
+    source: "employees"
+    freshness: "real-time"
+    aggregation: "sum"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-HC-004"
+    name: "Open Vacancies"
+    definition: "Authorized positions where filled_headcount is less than authorized headcount limit."
+    business_owner: "Job Architecture"
+    data_owner: "Job Architecture Domain"
+    calculation: "SUM(headcount - filled_headcount) WHERE status = 'active' AND (headcount > filled_headcount)"
+    unit: "positions"
+    dimensions: ["department", "job_grade", "location"]
+    filters: ["department_id", "status = 'active'"]
+    source: "positions"
+    freshness: "real-time"
+    aggregation: "sum"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  # ==========================================
+  # 2. TURNOVER & RETENTION
+  # ==========================================
+  - kpi_id: "KPI-TO-001"
+    name: "Annualized Employee Turnover Rate"
+    definition: "Percentage of employees separating from the organization over a 12-month period relative to average active headcount."
+    business_owner: "Talent & People Ops"
+    data_owner: "Core HR & Offboarding"
+    calculation: "(Total Exits in Period / Average Headcount in Period) * 100"
+    unit: "percentage"
+    dimensions: ["department", "branch", "job_grade", "tenure_bracket"]
+    filters: ["date_range", "department_id"]
+    source: "employees (termination_date), separation_cases"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2026-01-01"
+    version: 2
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-TO-002"
+    name: "Voluntary Turnover Rate"
+    definition: "Percentage of exits initiated by the employee (resignation, career change) versus total exits."
+    business_owner: "Talent & People Ops"
+    data_owner: "Offboarding Domain"
+    calculation: "(Voluntary Exits / Average Headcount) * 100"
+    unit: "percentage"
+    dimensions: ["department", "tenure_bracket", "reason_category"]
+    filters: ["separation_type = 'resignation'"]
+    source: "separation_cases"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-TO-003"
+    name: "Regrettable Attrition Rate"
+    definition: "Turnover of designated top performers, high potentials, or key-person position holders."
+    business_owner: "Talent & Succession"
+    data_owner: "Performance & Talent Domains"
+    calculation: "(Exits of High Performers / Total High Performers Population) * 100"
+    unit: "percentage"
+    dimensions: ["talent_pool", "department", "criticality_rating"]
+    filters: ["is_high_performer = 1", "talent_pool_member = 1"]
+    source: "separation_cases JOIN talent_pool_members ON separation_cases.employee_id = talent_pool_members.employee_id"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2025-06-01"
+    version: 1
+    status: "CERTIFIED"
+
+  # ==========================================
+  # 3. ABSENCE & TIME MANAGEMENT
+  # ==========================================
+  - kpi_id: "KPI-ABS-001"
+    name: "Absence Rate"
+    definition: "Ratio of total absent work days to total scheduled working days across the workforce population."
+    business_owner: "Absence Management"
+    data_owner: "Absence & Scheduling Domains"
+    calculation: "(Total Absent Days / Total Scheduled Working Days) * 100"
+    unit: "percentage"
+    dimensions: ["department", "leave_type", "location"]
+    filters: ["leave_type_id", "date_range"]
+    source: "leave_applications, timesheets"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-TIME-001"
+    name: "Overtime Hours & Utilization"
+    definition: "Total approved overtime hours worked in excess of standard scheduled contract hours."
+    business_owner: "Workforce Time & Attendance"
+    data_owner: "Time & Attendance Domain"
+    calculation: "SUM(total_approved_overtime_minutes) / 60"
+    unit: "hours"
+    dimensions: ["department", "shift", "branch"]
+    filters: ["period_start", "period_end", "department_id"]
+    source: "timesheets"
+    freshness: "daily"
+    aggregation: "sum"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  # ==========================================
+  # 4. WORKFORCE COST & PAYROLL
+  # ==========================================
+  - kpi_id: "KPI-COST-001"
+    name: "Monthly Labor Cost Runrate"
+    definition: "Total recurring labor expenditure including gross salaries, overtime payments, employer statutory contributions, and recurring benefits."
+    business_owner: "Workforce Cost & Finance"
+    data_owner: "Payroll & Compensation Domains"
+    calculation: "SUM(gross_salary + employer_contributions + overtime_pay)"
+    unit: "currency_usd"
+    dimensions: ["department", "cost_center", "legal_entity"]
+    filters: ["payroll_period_id", "company_id"]
+    source: "payroll_entries, employee_compensations"
+    freshness: "monthly"
+    aggregation: "sum"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-COST-002"
+    name: "Labor Cost per FTE"
+    definition: "Average monthly or annual labor cost incurred per Full-Time Equivalent."
+    business_owner: "Workforce Cost"
+    data_owner: "Payroll & Core HR"
+    calculation: "Total Gross Labor Cost / Total Active FTE"
+    unit: "currency_per_fte"
+    dimensions: ["department", "job_grade", "cost_center"]
+    filters: ["payroll_period_id"]
+    source: "payroll_runs, employees"
+    freshness: "monthly"
+    aggregation: "avg"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  # ==========================================
+  # 5. PRODUCTIVITY & ROI
+  # ==========================================
+  - kpi_id: "KPI-PROD-001"
+    name: "Workforce Productivity Score"
+    definition: "Composite index evaluating task output, certified billable/scheduled utilization, and project milestone completion."
+    business_owner: "Workforce Productivity"
+    data_owner: "Productivity & Operations Domains"
+    calculation: "(Worked Regular Hours / Scheduled Hours) * Objective Completion Index * 100"
+    unit: "index_score"
+    dimensions: ["department", "team", "project"]
+    filters: ["date_range", "department_id"]
+    source: "timesheets, performance_goals"
+    freshness: "weekly"
+    aggregation: "avg"
+    effective_date: "2025-06-01"
+    version: 1
+    status: "CERTIFIED"
+
+  # ==========================================
+  # 6. RECRUITMENT & TALENT PIPELINE
+  # ==========================================
+  - kpi_id: "KPI-REC-001"
+    name: "Time to Hire"
+    definition: "Median days elapsed from job opening requisition approval to candidate offer acceptance."
+    business_owner: "Recruitment / ATS"
+    data_owner: "Recruitment Domain"
+    calculation: "MEDIAN(offer_acceptance_date - vacancy_approval_date)"
+    unit: "days"
+    dimensions: ["department", "job_family", "source_channel"]
+    filters: ["date_range", "job_family"]
+    source: "candidates, recruitment_offers"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-REC-002"
+    name: "Offer Acceptance Rate"
+    definition: "Percentage of extended formal employment offers that are accepted by candidates."
+    business_owner: "Recruitment / ATS"
+    data_owner: "Recruitment Domain"
+    calculation: "(Accepted Offers / Total Extended Offers) * 100"
+    unit: "percentage"
+    dimensions: ["department", "job_grade", "recruiter"]
+    filters: ["date_range"]
+    source: "recruitment_offers"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  # ==========================================
+  # 7. LEARNING, SKILLS & COMPLIANCE
+  # ==========================================
+  - kpi_id: "KPI-LMS-001"
+    name: "Mandatory Compliance Training Completion Rate"
+    definition: "Percentage of assigned statutory compliance courses completed prior to required due dates."
+    business_owner: "Workforce Compliance"
+    data_owner: "Learning (LMS) Domain"
+    calculation: "(Completed Mandatory Enrollments / Total Assigned Mandatory Enrollments) * 100"
+    unit: "percentage"
+    dimensions: ["department", "compliance_type", "location"]
+    filters: ["course_id", "is_mandatory = 1"]
+    source: "course_enrollments JOIN courses ON course_enrollments.course_id = courses.id"
+    freshness: "daily"
+    aggregation: "avg"
+    effective_date: "2025-01-01"
+    version: 1
+    status: "CERTIFIED"
+
+  - kpi_id: "KPI-SKILL-001"
+    name: "Critical Skill Bench Strength"
+    definition: "Ratio of certified proficient personnel mapped to enterprise critical competency positions."
+    business_owner: "Talent & Succession"
+    data_owner: "Skills & Job Architecture"
+    calculation: "(Employees with Level >= 3 in Critical Skill / Required Critical Positions Quota) * 100"
+    unit: "percentage"
+    dimensions: ["skill_category", "job_family"]
+    filters: ["verification_status = 'verified'"]
+    source: "employee_skills JOIN career_skills ON employee_skills.skill_id = career_skills.id"
+    freshness: "weekly"
+    aggregation: "avg"
+    effective_date: "2025-06-01"
+    version: 1
+    status: "CERTIFIED"

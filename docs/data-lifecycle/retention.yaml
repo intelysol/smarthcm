@@ -1,0 +1,48 @@
+version: "1.0"
+updated_at: "2026-09-22T08:45:00Z"
+
+retention_lifecycle_states:
+  - state: ACTIVE
+    description: "Operational record actively referenced by daily enterprise transactions."
+    retrieval_sla_ms: 100
+
+  - state: INACTIVE
+    description: "Completed business transaction or terminated entity in cooldown period."
+    retrieval_sla_ms: 200
+
+  - state: AGING
+    description: "Approaching operational window limit; eligible for compression or warm tiering."
+    retrieval_sla_ms: 500
+
+  - state: ARCHIVE_ELIGIBLE
+    description: "Qualified by policy age and completion criteria for archival extraction."
+    retrieval_sla_ms: 1000
+
+  - state: ARCHIVED
+    description: "Packed into cryptographic immutable archive storage outside live operational tables."
+    retrieval_sla_sec: 10
+
+  - state: RETENTION_PERIOD
+    description: "Statutory or contractual retention active; protected from purge."
+    retrieval_sla_sec: 30
+
+  - state: DELETION_ELIGIBLE
+    description: "Retention expired and zero legal holds or dependency locks active."
+    action_required: "Review, dry-run preview, and dual-party approval."
+
+  - state: LEGAL_HOLD
+    description: "Under active litigation or regulatory investigation; all deletion and purging strictly blocked."
+    immutable: true
+
+  - state: SECURE_DELETION
+    description: "Cryptographically erased and verified with immutable deletion certificate."
+    permanent: true
+
+lifecycle_anchors:
+  employee_records: "employment_termination_date"
+  payroll_runs: "pay_period_end_date"
+  attendance_punches: "punch_timestamp"
+  candidate_profiles: "last_interaction_or_consent_date"
+  audit_logs: "event_timestamp"
+  contracts_agreements: "contract_expiry_or_cancellation_date"
+  ai_interactions: "session_close_timestamp"

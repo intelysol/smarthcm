@@ -115,4 +115,35 @@ class HcmMetricRegistryService
             })
             ->first() ?? $metric->versions()->orderBy('version_number', 'asc')->first();
     }
+
+    public function getKpiExplanation(string $tenantId, string $code, ?string $asOfDate = null): ?array
+    {
+        $metric = $this->findMetric($tenantId, $code);
+        if (!$metric) {
+            return null;
+        }
+
+        $date = $asOfDate ?? now()->toDateString();
+        $version = $this->getVersionForDate($metric, $date);
+
+        return [
+            'kpi_code' => $metric->code,
+            'name' => $metric->name,
+            'category' => $metric->category,
+            'description' => $metric->description,
+            'owner' => $metric->owner ?? 'HCM Analytics',
+            'status' => $metric->is_active ? 'CERTIFIED' : 'DRAFT',
+            'certification_status' => $metric->is_active ? 'CERTIFIED' : 'DRAFT',
+            'unit' => $metric->unit,
+            'version' => $version?->version_number ?? $metric->current_version,
+            'effective_version' => $version?->version_number ?? $metric->current_version,
+            'formula' => $version?->calculation_definition['formula'] ?? $metric->formula,
+            'as_of_date' => $date,
+            'data_sources' => !empty($metric->data_sources) ? $metric->data_sources : ['employees', 'employee_terminations'],
+            'lineage' => [
+                'data_sources' => !empty($metric->data_sources) ? $metric->data_sources : ['employees', 'employee_terminations'],
+            ],
+            'last_refreshed_at' => now()->toIso8601String(),
+        ];
+    }
 }

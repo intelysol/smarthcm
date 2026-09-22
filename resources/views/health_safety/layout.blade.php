@@ -51,5 +51,35 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         @yield('content')
     </main>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+    window.showNotification = function(type, message, title = null, refId = null) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto p-4 rounded-xl shadow-2xl border text-sm max-w-sm flex items-start gap-3 transition-all duration-300 transform translate-x-5 opacity-0 ${
+            type === 'success' ? 'bg-slate-900 border-emerald-500/40 text-emerald-300' :
+            type === 'error' ? 'bg-slate-900 border-rose-500/40 text-rose-300' :
+            'bg-slate-900 border-amber-500/40 text-amber-300'
+        }`;
+        toast.innerHTML = `
+            <div class="flex-1">
+                ${title ? `<div class="font-bold text-xs uppercase tracking-wider text-white mb-0.5">${title}</div>` : ''}
+                <div class="text-xs text-slate-200">${message}</div>
+                ${refId ? `<div class="text-[10px] text-slate-400 mt-1 font-mono">Ref: ${refId}</div>` : ''}
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white p-1 text-xs">&times;</button>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => { toast.classList.remove('translate-x-5', 'opacity-0'); }, 10);
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-x-5');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    };
+    </script>
 </body>
 </html>

@@ -230,7 +230,7 @@
                 <h2 class="text-lg font-bold text-slate-900">Workforce Scenario Comparison</h2>
                 <p class="text-xs text-slate-500">Hypothetical organizational models simulated without mutating actual records</p>
             </div>
-            <button class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+            <button onclick="openNewScenarioModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
                 <i class="fa-solid fa-plus mr-1"></i>New Scenario
             </button>
         </div>
@@ -291,4 +291,94 @@
     </div>
 
 </div>
+
+<!-- New Scenario Modal -->
+<div id="new-scenario-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                    <i class="fa-solid fa-code-compare"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm">Create Workforce Scenario</h3>
+                    <p class="text-xs text-slate-500">Model hypothetical staffing & organizational impacts</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeNewScenarioModal()" class="text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form id="new-scenario-form" onsubmit="handleNewScenario(event)" class="p-6 space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Scenario Name</label>
+                <input type="text" id="scenario-name" required placeholder="e.g., Q3 Global Expansion Model" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Type</label>
+                    <select id="scenario-type" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition">
+                        <option value="Growth">Growth Expansion</option>
+                        <option value="Cost Reduction">Cost Reduction</option>
+                        <option value="Hiring Freeze">Hiring Freeze</option>
+                        <option value="Reorganization">Reorganization</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Target Headcount Delta</label>
+                    <input type="number" id="scenario-headcount" required placeholder="e.g., 50 or -20" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Projected Annual Budget Delta ($)</label>
+                <input type="number" id="scenario-budget" required placeholder="e.g., 500000" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Notes & Strategic Rationale</label>
+                <textarea id="scenario-notes" rows="2" placeholder="Brief rationale for this scenario..." class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition"></textarea>
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                <button type="button" onclick="closeNewScenarioModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 transition">Cancel</button>
+                <button type="submit" id="save-scenario-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center">
+                    <i class="fa-solid fa-floppy-disk mr-1.5"></i>Create Scenario
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openNewScenarioModal() {
+    document.getElementById('new-scenario-modal').classList.remove('hidden');
+}
+
+function closeNewScenarioModal() {
+    document.getElementById('new-scenario-modal').classList.add('hidden');
+}
+
+function handleNewScenario(e) {
+    e.preventDefault();
+    const btn = document.getElementById('save-scenario-btn');
+    const name = document.getElementById('scenario-name').value;
+    const type = document.getElementById('scenario-type').value;
+    const headcount = document.getElementById('scenario-headcount').value;
+    const budget = document.getElementById('scenario-budget').value;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Creating...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Create Scenario';
+        closeNewScenarioModal();
+        document.getElementById('new-scenario-form').reset();
+        
+        const refId = 'WFP-' + Math.floor(1000 + Math.random() * 9000);
+        if (window.showNotification) {
+            window.showNotification('success', `Scenario "${name}" (${type}) created with target ${headcount > 0 ? '+' : ''}${headcount} headcount.`, 'Scenario Created', refId);
+        }
+    }, 600);
+}
+</script>
 @endsection

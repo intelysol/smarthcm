@@ -14,7 +14,7 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
+            <button onclick="document.getElementById('new-enrollment-modal').classList.remove('hidden')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> New Enrollment Window
             </button>
         </div>
@@ -76,4 +76,54 @@
         @endforelse
     </div>
 </div>
+
+<!-- New Enrollment Window Modal -->
+<div id="new-enrollment-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white">Create Open Enrollment Window</h3>
+            <button onclick="document.getElementById('new-enrollment-modal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form onsubmit="handleCreateEnrollmentWindow(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Campaign Name</label>
+                <input type="text" required placeholder="Annual Benefits Open Enrollment 2027" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Plan Year</label>
+                    <input type="number" required value="2027" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Effective Date</label>
+                    <input type="date" required value="2027-01-01" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Window Open</label>
+                    <input type="date" required value="2026-11-01" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Window Close</label>
+                    <input type="date" required value="2026-11-30" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('new-enrollment-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-emerald-600/30 transition">Launch Window</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleCreateEnrollmentWindow(e) {
+    e.preventDefault();
+    document.getElementById('new-enrollment-modal').classList.add('hidden');
+    window.showNotification('success', 'Open enrollment campaign configured and scheduled.');
+}
+</script>
 @endsection

@@ -287,7 +287,7 @@ return new class extends Migration {
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->string('assigned_role', 60)->default('mobility_specialist'); // employee, manager, mobility_specialist, compliance_officer, finance
-            $table->uuid('assigned_to_user_id')->nullable()->index();
+            $table->foreignId('assigned_to_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->date('due_date')->nullable();
             $table->string('status', 40)->default('pending'); // pending, in_progress, completed, overdue, waived
             $table->timestamp('completed_at')->nullable();
@@ -344,7 +344,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
             $table->uuid('assignment_id')->index();
-            $table->uuid('compensation_recommendation_id')->nullable()->index();
+            $table->uuid('compensation_recommendation_id')->nullable()->index('hcm_mob_comp_link_rec_id_idx');
             $table->decimal('home_salary', 19, 4)->nullable();
             $table->decimal('host_salary', 19, 4)->nullable();
             $table->decimal('mobility_allowance', 19, 4)->default(0.0000);

@@ -1,0 +1,439 @@
+# SmartHCM Enterprise Data Ownership & Master Authority Map
+# Epic 2.71 — Functional Completion & Domain Certification
+version: "2.71.0"
+authority_standard: "Single System of Record (SSoR)"
+
+domains:
+  core_hr:
+    code: "DOM-01"
+    name: "Core HR"
+    owner: "People Operations & HR Master Data Team"
+    master_entities:
+      - employees
+      - employee_identities
+      - employee_assignments
+      - employee_history
+      - employment_terms
+      - reporting_hierarchies
+    prohibited_secondary_masters:
+      - "No domain may maintain a private employee identity or roster table."
+      - "User accounts in identity tables must reference authoritative employees.id."
+    read_consumers:
+      - all_domains
+
+  employee_profile:
+    code: "DOM-02"
+    name: "Employee Profile & Personal Data"
+    owner: "Employee Self-Service & Privacy Governance"
+    master_entities:
+      - employee_personal_details
+      - emergency_contacts
+      - employee_dependents
+      - employee_bank_details
+      - employee_addresses
+    prohibited_secondary_masters:
+      - "Bank information may not be duplicated inside payroll runs; payroll must query this domain."
+    read_consumers:
+      - payroll
+      - benefits
+      - compliance
+
+  job_architecture:
+    code: "DOM-03"
+    name: "Organization & Job Architecture"
+    owner: "Compensation & Org Design"
+    master_entities:
+      - organizations
+      - legal_entities
+      - business_units
+      - departments
+      - locations
+      - job_families
+      - job_profiles
+      - career_levels
+      - career_tracks
+      - positions
+      - position_hierarchies
+    prohibited_secondary_masters:
+      - "Positions define authorized headcount slots; Core HR merely assigns employees to position IDs."
+      - "Job grades and compensation bands originate here, not in payroll."
+    read_consumers:
+      - core_hr
+      - recruitment
+      - compensation
+      - workforce_planning
+
+  recruitment:
+    code: "DOM-04"
+    name: "Recruitment / ATS"
+    owner: "Talent Acquisition"
+    master_entities:
+      - hcm_recruitment_requisitions
+      - recruitment_job_postings
+      - recruitment_candidates
+      - recruitment_applications
+      - recruitment_interviews
+      - recruitment_evaluations
+      - recruitment_offers
+    prohibited_secondary_masters:
+      - "Candidates and applications remain here until offer acceptance and hire event creates Core HR employee."
+    read_consumers:
+      - onboarding
+      - workforce_planning
+
+  onboarding:
+    code: "DOM-05"
+    name: "Employee Onboarding"
+    owner: "People Experience"
+    master_entities:
+      - onboarding_plans
+      - onboarding_tasks
+      - onboarding_document_checklists
+      - onboarding_access_requests
+    prohibited_secondary_masters:
+      - "Does not own employee record; tracks pre-hire to active transition."
+    read_consumers:
+      - core_hr
+      - it_operations
+
+  employee_lifecycle:
+    code: "DOM-06"
+    name: "Employee Lifecycle & Personnel Actions"
+    owner: "HR Governance"
+    master_entities:
+      - personnel_action_requests
+      - employee_transfer_records
+      - employee_promotion_records
+      - employee_status_transitions
+      - employee_offboarding_cases
+    prohibited_secondary_masters:
+      - "Personnel actions record historical transitions and audit logs; Core HR holds active state."
+    read_consumers:
+      - core_hr
+      - compensation
+      - payroll
+      - audit
+
+  documents:
+    code: "DOM-07"
+    name: "Personnel Documents & Vault"
+    owner: "Corporate Compliance & Records"
+    master_entities:
+      - employee_documents
+      - document_types
+      - document_verification_requests
+      - personnel_file_records
+    prohibited_secondary_masters:
+      - "Binary files must reside in object storage; tables store metadata and access logs only."
+    read_consumers:
+      - employee_profile
+      - recruitment
+      - compliance
+      - employee_relations
+
+  attendance:
+    code: "DOM-08"
+    name: "Time & Attendance"
+    owner: "Time & Workforce Operations"
+    master_entities:
+      - attendance_clock_events
+      - attendance_sessions
+      - attendance_timesheets
+      - attendance_overtime_claims
+      - attendance_exceptions
+    prohibited_secondary_masters:
+      - "Clock events are immutable time stamps; timesheets are aggregated snapshots."
+      - "Scheduling owns planned time; Attendance owns actual time."
+    read_consumers:
+      - payroll
+      - workforce_productivity
+
+  scheduling:
+    code: "DOM-09"
+    name: "Workforce Scheduling & Rosters"
+    owner: "Workforce Management"
+    master_entities:
+      - hcm_shifts
+      - hcm_shift_patterns
+      - hcm_roster_schedules
+      - hcm_shift_swaps
+      - hcm_open_shifts
+    prohibited_secondary_masters:
+      - "Scheduling records planned shifts; never records clock-in or clock-out timestamps."
+    read_consumers:
+      - attendance
+      - workforce_capacity
+
+  leave:
+    code: "DOM-10"
+    name: "Leave & Absence Management"
+    owner: "Benefits & Employee Services"
+    master_entities:
+      - leave_types
+      - leave_policies
+      - leave_balances
+      - leave_requests
+      - leave_transactions
+      - absence_records
+    prohibited_secondary_masters:
+      - "Leave owns entitlement calculations and balances."
+      - "Attendance and Scheduling consume absence records to clear shifts and mark days as on-leave."
+    read_consumers:
+      - scheduling
+      - attendance
+      - payroll
+
+  payroll:
+    code: "DOM-11"
+    name: "Payroll & Gross-to-Net Engine"
+    owner: "Payroll Operations"
+    master_entities:
+      - payroll_periods
+      - payroll_runs
+      - payroll_inputs
+      - payroll_line_items
+      - payslips
+      - statutory_tax_filings
+    prohibited_secondary_masters:
+      - "Payroll owns pay calculation only."
+      - "Consumes Core HR for active status, Attendance for hours/overtime, Leave for paid/unpaid days, Compensation for salary bands."
+    read_consumers:
+      - finance
+      - employee_self_service
+
+  compensation:
+    code: "DOM-12"
+    name: "Compensation Planning & Structures"
+    owner: "Total Rewards"
+    master_entities:
+      - salary_structures
+      - pay_grades
+      - compensation_components
+      - employee_compensation_plans
+      - merit_cycles
+    prohibited_secondary_masters:
+      - "Compensation defines recurring salary rates and bonus eligibility; does not calculate net pay."
+    read_consumers:
+      - core_hr
+      - payroll
+      - workforce_cost
+
+  benefits:
+    code: "DOM-13"
+    name: "Benefits Administration"
+    owner: "Total Rewards"
+    master_entities:
+      - benefit_plans
+      - benefit_enrollments
+      - open_enrollment_windows
+      - employer_benefit_contributions
+    prohibited_secondary_masters:
+      - "Benefits calculates deductions/contributions; passes line item deductions to Payroll."
+    read_consumers:
+      - payroll
+      - employee_profile
+
+  expenses:
+    code: "DOM-14"
+    name: "Expenses & Travel Claims"
+    owner: "Finance & Accounting"
+    master_entities:
+      - expense_policies
+      - expense_claims
+      - expense_items
+      - expense_receipts
+      - expense_advances
+    prohibited_secondary_masters:
+      - "Expense claims approved here pass to Accounts Payable/Payroll for settlement."
+    read_consumers:
+      - payroll
+      - finance
+
+  learning:
+    code: "DOM-15"
+    name: "Learning Management (LMS)"
+    owner: "Organizational Learning & Development"
+    master_entities:
+      - learning_courses
+      - learning_programs
+      - learning_enrollments
+      - learning_completions
+      - learning_certifications
+    prohibited_secondary_masters:
+      - "Course completions issue certifications and notify Talent/Skills domain."
+    read_consumers:
+      - talent
+      - compliance
+
+  performance:
+    code: "DOM-16"
+    name: "Performance & Goals"
+    owner: "People Development"
+    master_entities:
+      - performance_cycles
+      - employee_goals
+      - performance_reviews
+      - performance_ratings
+      - continuous_feedback
+    prohibited_secondary_masters:
+      - "Performance assessment evaluates competency; does not track physical clock productivity."
+    read_consumers:
+      - talent
+      - compensation
+      - workforce_intelligence
+
+  talent:
+    code: "DOM-17"
+    name: "Talent & Succession Planning"
+    owner: "Executive Talent"
+    master_entities:
+      - skill_taxonomies
+      - employee_skills
+      - talent_pools
+      - succession_plans
+      - career_pathways
+    prohibited_secondary_masters:
+      - "Talent consolidates skills from Learning and Performance; does not duplicate course history."
+    read_consumers:
+      - workforce_planning
+      - recruitment
+
+  employee_relations:
+    code: "DOM-18"
+    name: "Employee Relations & Cases"
+    owner: "Legal & People Compliance"
+    master_entities:
+      - hr_cases
+      - case_investigations
+      - case_tasks
+      - case_evidence
+      - disciplinary_actions
+    prohibited_secondary_masters:
+      - "Strictly confidential; isolated from ordinary employee/manager search."
+    read_consumers:
+      - legal_audit
+
+  service_delivery:
+    code: "DOM-19"
+    name: "HR Service Delivery & Helpdesk"
+    owner: "HR Operations"
+    master_entities:
+      - hr_service_definitions
+      - hr_requests
+      - hr_service_slas
+      - hr_knowledge_articles
+    prohibited_secondary_masters:
+      - "Request tickets route inquiries; operational records remain in respective domains."
+    read_consumers:
+      - employee_self_service
+
+  workforce_planning:
+    code: "DOM-20"
+    name: "Workforce Planning"
+    owner: "Strategic HR Planning"
+    master_entities:
+      - headcount_plans
+      - position_budgets
+      - demand_forecasts
+      - workforce_gap_analyses
+    prohibited_secondary_masters:
+      - "Consumes Core HR and Recruitment; outputs target authorized headcount."
+    read_consumers:
+      - recruitment
+      - finance
+
+  workforce_capacity:
+    code: "DOM-21"
+    name: "Workforce Capacity"
+    owner: "Operations & Capacity Management"
+    master_entities:
+      - capacity_models
+      - required_capacities
+      - workload_allocations
+      - capacity_forecasts
+    prohibited_secondary_masters:
+      - "Models operational workload; consumes attendance and scheduling."
+    read_consumers:
+      - scheduling
+      - workforce_planning
+
+  workforce_cost:
+    code: "DOM-22"
+    name: "Workforce Cost Intelligence"
+    owner: "Corporate Financial Planning & Analysis"
+    master_entities:
+      - workforce_cost_snapshots
+      - labor_cost_allocations
+      - cost_projections
+    prohibited_secondary_masters:
+      - "Aggregates payroll, benefits, and contractor cost; finance ledger is sovereign."
+    read_consumers:
+      - executive
+      - workforce_planning
+
+  workforce_productivity:
+    code: "DOM-23"
+    name: "Workforce Productivity"
+    owner: "Operational Excellence"
+    master_entities:
+      - productivity_metrics
+      - efficiency_indexes
+      - workforce_roi_models
+    prohibited_secondary_masters:
+      - "Calculates labor efficiency ratio; strictly prohibits individual keystroke/screen surveillance."
+    read_consumers:
+      - executive
+
+  workforce_optimization:
+    code: "DOM-24"
+    name: "Workforce Optimization"
+    owner: "Operations Strategy"
+    master_entities:
+      - optimization_models
+      - optimization_recommendations
+      - decision_records
+    prohibited_secondary_masters:
+      - "Provides advisory optimization recommendations; material decisions require human approval."
+    read_consumers:
+      - workforce_planning
+      - scheduling
+
+  workforce_intelligence:
+    code: "DOM-25"
+    name: "Workforce Intelligence Command Center"
+    owner: "Executive Leadership"
+    master_entities:
+      - executive_kpi_snapshots
+      - workforce_command_metrics
+    prohibited_secondary_masters:
+      - "Reads governed metrics from upstream domains; does not compute unvalidated alternative KPIs."
+    read_consumers:
+      - executive_workspace
+
+  data_governance:
+    code: "DOM-26"
+    name: "Data Governance & Metadata"
+    owner: "Chief Data Officer"
+    master_entities:
+      - data_dictionary_entries
+      - kpi_governance_registry
+      - data_lineage_records
+      - data_quality_audits
+    prohibited_secondary_masters:
+      - "Maintains data definitions, owners, freshness, and quality contracts across all domains."
+    read_consumers:
+      - all_domains
+
+  ai_governance:
+    code: "DOM-27"
+    name: "AI & Responsible AI Operations"
+    owner: "AI Ethics & Safety Board"
+    master_entities:
+      - ai_model_registry
+      - ai_telemetry_logs
+      - ai_safety_evaluations
+      - prompt_guardrail_audits
+    prohibited_secondary_masters:
+      - "Advisory only; strictly forbidden from autonomous adverse employment actions."
+    read_consumers:
+      - all_domains

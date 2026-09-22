@@ -150,13 +150,12 @@ return new class extends Migration
             $table->string('reason', 255)->nullable();
             $table->string('status', 30)->default('pending')->index(); // pending, approved, rejected, cancelled, applied_to_payroll
             $table->timestamp('payroll_actioned_at')->nullable();
-            $table->uuid('reviewed_by')->nullable();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->string('rejection_reason', 255)->nullable();
             $table->timestamps();
 
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->foreign('reviewed_by')->references('id')->on('users')->nullOnDelete();
         });
 
         // 7. General Employee Personal Data Change Requests
@@ -170,13 +169,12 @@ return new class extends Migration
             $table->date('effective_date');
             $table->string('reason', 255)->nullable();
             $table->uuid('supporting_document_id')->nullable();
-            $table->uuid('reviewed_by')->nullable();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->string('rejection_reason', 255)->nullable();
             $table->timestamps();
 
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->foreign('reviewed_by')->references('id')->on('users')->nullOnDelete();
         });
 
         // 8. Change Request Items (Side-by-Side Current vs Proposed)
@@ -204,13 +202,12 @@ return new class extends Migration
             $table->uuid('verifiable_id')->index();
             $table->string('verification_method', 50); // document, hr_manual, otp, external_service
             $table->string('status', 30)->default('pending')->index(); // pending, verified, rejected, expired
-            $table->uuid('verified_by')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->foreign('verified_by')->references('id')->on('users')->nullOnDelete();
         });
 
         // 10. Data Quality Results
@@ -252,15 +249,13 @@ return new class extends Migration
             $table->uuid('tenant_id')->index();
             $table->string('batch_number', 50)->unique();
             $table->string('category', 50); // personal, address, emergency_contact, dependent, identifier
-            $table->uuid('uploaded_by')->index();
+            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
             $table->integer('total_items')->default(0);
             $table->integer('valid_items')->default(0);
             $table->integer('error_items')->default(0);
             $table->integer('processed_items')->default(0);
             $table->string('status', 30)->default('draft')->index(); // draft, validated, processing, completed, failed
             $table->timestamps();
-
-            $table->foreign('uploaded_by')->references('id')->on('users')->cascadeOnDelete();
         });
 
         Schema::create('hcm_employee_data_bulk_items', function (Blueprint $table) {

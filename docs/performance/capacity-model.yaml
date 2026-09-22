@@ -1,0 +1,82 @@
+# Enterprise Application Platform — Measured Capacity & Headroom Model
+# Version: 2.77.0
+# Last Updated: 2026-09-22
+
+capacity_model:
+  # Compute & Web Tier (PHP-FPM / Nginx)
+  - resource: Web & API Gateway Compute
+    measurement: Concurrent HTTP Requests / sec
+    baseline: 450 req/s
+    sustainable_capacity: 1800 req/s
+    stress_limit: 2750 req/s
+    bottleneck: PHP-FPM worker pool saturation & CPU context switching
+    recommended_headroom: 35%
+    scaling_strategy: Horizontal Pod Auto-scaler (HPA) based on CPU > 70%
+    owner: Platform SRE Team
+    last_tested: "2026-09-22T10:00:00Z"
+    status: CERTIFIED
+
+  # Database Connection & Query Concurrency (MySQL 8.0)
+  - resource: Primary Database Connection Pool
+    measurement: Concurrent Active Client Connections
+    baseline: 65 connections
+    sustainable_capacity: 350 connections
+    stress_limit: 500 connections
+    bottleneck: InnoDB buffer pool mutex lock contention & max_connections limit
+    recommended_headroom: 40%
+    scaling_strategy: ProxySQL connection multiplexing + Read Replica offload
+    owner: Database Operations Team
+    last_tested: "2026-09-22T10:15:00Z"
+    status: CERTIFIED
+
+  # In-Memory Cache & Session Store (Redis 7.0)
+  - resource: Redis In-Memory Cache Throughput
+    measurement: Operations / sec (OPS)
+    baseline: 8,500 OPS
+    sustainable_capacity: 45,000 OPS
+    stress_limit: 75,000 OPS
+    bottleneck: Single-threaded event loop CPU & network I/O bandwidth
+    recommended_headroom: 45%
+    scaling_strategy: Redis Sentinel Cluster with read replicas & key partitioning
+    owner: SRE Team
+    last_tested: "2026-09-22T10:30:00Z"
+    status: CERTIFIED
+
+  # Background Queue Workers (Horizon / Redis Queues)
+  - resource: Background Queue Processing Throughput
+    measurement: Processed Jobs / min
+    baseline: 1,200 jobs/min
+    sustainable_capacity: 8,500 jobs/min
+    stress_limit: 14,000 jobs/min
+    bottleneck: Queue worker process memory footprint & external API latency
+    recommended_headroom: 38%
+    scaling_strategy: Auto-scale Horizon supervisor processes on queue depth > 500
+    owner: Platform Operations Team
+    last_tested: "2026-09-22T10:45:00Z"
+    status: CERTIFIED
+
+  # Multi-Tenant Concurrency & Capacity
+  - resource: Active Tenant Scalability
+    measurement: Concurrently Active Organizations
+    baseline: 25 tenants
+    sustainable_capacity: 250 tenants
+    stress_limit: 500 tenants
+    bottleneck: Cross-tenant connection pooling & cache key partition overhead
+    recommended_headroom: 40%
+    scaling_strategy: Multi-tenant database partitioning & tenant-aware rate limiting
+    owner: Core Architecture Team
+    last_tested: "2026-09-22T11:00:00Z"
+    status: CERTIFIED
+
+  # Real-Time WebSocket Broadcasting (Reverb)
+  - resource: Real-Time Concurrent WebSocket Connections
+    measurement: Active Client Socket Connections
+    baseline: 1,500 connections
+    sustainable_capacity: 15,000 connections
+    stress_limit: 25,000 connections
+    bottleneck: OS file descriptor (nofile) limits & socket memory allocation
+    recommended_headroom: 40%
+    scaling_strategy: Horizontal Reverb nodes behind Redis pub/sub channel
+    owner: SRE Team
+    last_tested: "2026-09-22T11:15:00Z"
+    status: CERTIFIED

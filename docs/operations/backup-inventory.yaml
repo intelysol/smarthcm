@@ -1,0 +1,116 @@
+# Enterprise Application Platform — Authoritative Backup Inventory
+# Version: 2.76.0
+# Last Updated: 2026-09-22
+
+inventory:
+  - asset_id: bkp-db-full
+    name: Primary Database Full Consistent Snapshot
+    category: database
+    tier: tier-0
+    frequency: Daily at 02:00 UTC
+    format: SQL dump (.sql.gz)
+    mechanism: mysqldump --single-transaction --quick --routines --triggers
+    encryption: AES-256 (GPG / AWS KMS)
+    storage_target: S3 Glacier Deep Archive (WORM Object Lock)
+    retention: 30 days daily, 12 months monthly, 7 years annual compliance
+    checksum_type: SHA-256
+    integrity_verification: Automated test restore into scratch database
+    contains_secrets: No (Passwords hashed with bcrypt, secrets encrypted at rest)
+
+  - asset_id: bkp-db-incremental
+    name: Database Point-in-Time Binary Logs (WAL)
+    category: database
+    tier: tier-0
+    frequency: Every 15 minutes continuous archive
+    format: MySQL Binary Logs (.bin)
+    mechanism: mysqlbinlog streaming to secure archive bucket
+    encryption: AES-256 (KMS)
+    storage_target: S3 Standard-IA / Secondary Cloud Region
+    retention: 14 days rolling
+    checksum_type: CRC32 / SHA-256
+    integrity_verification: Continuous replication lag audit
+    contains_secrets: No (Encrypted parameters masked)
+
+  - asset_id: bkp-documents-private
+    name: Employee Documents & Legal Contracts
+    category: file-storage
+    tier: tier-0
+    frequency: Real-time continuous versioning
+    format: Original binary (PDF, PNG, JPG, DOCX)
+    mechanism: S3 Cross-Region Replication (CRR) with Versioning
+    encryption: SSE-KMS (Customer Managed Key)
+    storage_target: Dual-region S3 bucket with Object Lock Compliance mode
+    retention: 7 years minimum statutory
+    checksum_type: SHA-256 stored in document_records table
+    integrity_verification: Scheduled periodic hash recalculation
+    contains_secrets: No
+
+  - asset_id: bkp-payroll-artifacts
+    name: Immutable Frozen Payslips & Banking Clearing Files
+    category: file-storage
+    tier: tier-1
+    frequency: Per payroll finalization run
+    format: Signed PDF & ISO20022 XML
+    mechanism: Synchronous S3 upload with immutability flag
+    encryption: AES-256 (KMS)
+    storage_target: S3 Object Lock Archive
+    retention: 10 years statutory
+    checksum_type: SHA-256
+    integrity_verification: Payment batch checksum matching
+    contains_secrets: No
+
+  - asset_id: bkp-app-config
+    name: Application Non-Secret Configuration & Templates
+    category: configuration
+    tier: tier-1
+    frequency: On every git release commit
+    format: Git repository tree (.env.example, config/*.php)
+    mechanism: Git commit history + GitHub Enterprise backup
+    encryption: Git commit signing (GPG) + TLS
+    storage_target: Multi-region GitHub Enterprise + local bare clone
+    retention: Permanent
+    checksum_type: Git SHA-1 / SHA-256
+    integrity_verification: Release tag signature verification
+    contains_secrets: STRICT NO (Master secrets managed in AWS Secrets Manager / Vault)
+
+  - asset_id: bkp-workflow-definitions
+    name: Multi-Step Approval Workflow State & Rules
+    category: application-state
+    tier: tier-1
+    frequency: Backed up with primary database
+    format: SQL tables (workflows, workflow_instances, approval_steps)
+    mechanism: Included in bkp-db-full
+    encryption: Inherited from DB snapshot
+    storage_target: Inherited from DB snapshot
+    retention: 5 years
+    checksum_type: SHA-256
+    integrity_verification: State machine transition consistency check
+    contains_secrets: No
+
+  - asset_id: bkp-integration-state
+    name: Enterprise Webhook & Integration State Checkpoints
+    category: integrations
+    tier: tier-2
+    frequency: Backed up with primary database
+    format: SQL tables (integrations, webhook_deliveries, api_checkpoints)
+    mechanism: Included in bkp-db-full
+    encryption: Sensitive partner tokens encrypted with AES-256-CBC app key
+    storage_target: Inherited from DB snapshot
+    retention: 180 days
+    checksum_type: SHA-256
+    integrity_verification: Checkpoint replay drill
+    contains_secrets: Yes (Encrypted via Laravel Crypt facade)
+
+  - asset_id: bkp-ai-governance
+    name: AI Use-Cases, Prompt Templates & Safety Policies
+    category: ai
+    tier: tier-3
+    frequency: Git commits + DB metadata snapshot
+    format: JSON / Markdown / SQL
+    mechanism: Version-controlled prompt registry
+    encryption: Standard storage encryption
+    storage_target: Git + S3
+    retention: 1 year
+    checksum_type: SHA-256
+    integrity_verification: Prompt injection test suite
+    contains_secrets: STRICT NO (API keys never stored in prompt files)

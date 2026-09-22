@@ -1,0 +1,94 @@
+version: "1.0"
+updated_at: "2026-09-22T08:45:00Z"
+hierarchy:
+  - platform_default
+  - product_tier
+  - tenant_override
+  - domain
+  - data_class
+
+rules:
+  strictest_retention_rule: "MAX(platform_minimum_days, tenant_requested_days)"
+  destructive_deletion_approval_required: true
+  dry_run_default: true
+
+policies:
+  - domain: "Employee"
+    data_class: "Employee Master Data"
+    classification: "SENSITIVE"
+    platform_minimum_retention_days: 2555 # 7 years post-termination
+    active_days: 365
+    archive_strategy: "cold_storage"
+    legal_hold_supported: true
+    is_system_locked: true
+    dependencies: ["Payroll", "Tax", "Documents", "Audit"]
+
+  - domain: "Payroll"
+    data_class: "Payroll Runs & Compensation"
+    classification: "HIGHLY_SENSITIVE"
+    platform_minimum_retention_days: 3650 # 10 years statutory tax limit
+    active_days: 730
+    archive_strategy: "immutable_worm"
+    legal_hold_supported: true
+    is_system_locked: true
+    dependencies: ["Employee Master Data", "Financial Ledgers", "Audit"]
+
+  - domain: "Attendance"
+    data_class: "Biometric Punches & Timesheets"
+    classification: "INTERNAL"
+    platform_minimum_retention_days: 1095 # 3 years
+    active_days: 90
+    archive_strategy: "partitioned_archive"
+    legal_hold_supported: true
+    is_system_locked: false
+    dependencies: ["Payroll"]
+
+  - domain: "Recruitment"
+    data_class: "Candidate Profiles & Resumes"
+    classification: "CONFIDENTIAL"
+    platform_minimum_retention_days: 365 # 1 year (GDPR/Compliance consent standard)
+    active_days: 180
+    archive_strategy: "compressed_blob"
+    legal_hold_supported: true
+    is_system_locked: false
+    dependencies: []
+
+  - domain: "Documents"
+    data_class: "Employee Private Documents"
+    classification: "SENSITIVE"
+    platform_minimum_retention_days: 2555 # 7 years
+    active_days: 365
+    archive_strategy: "s3_glacier_vault"
+    legal_hold_supported: true
+    is_system_locked: true
+    dependencies: ["Employee Master Data"]
+
+  - domain: "Audit & Security"
+    data_class: "Immutable Security & Audit Trails"
+    classification: "SECURITY_CRITICAL"
+    platform_minimum_retention_days: 2555 # 7 years
+    active_days: 365
+    archive_strategy: "immutable_worm"
+    legal_hold_supported: true
+    is_system_locked: true
+    dependencies: []
+
+  - domain: "Observability"
+    data_class: "Operational Metrics & Traces"
+    classification: "INTERNAL"
+    platform_minimum_retention_days: 90 # 90 days
+    active_days: 30
+    archive_strategy: "rolling_purge"
+    legal_hold_supported: false
+    is_system_locked: false
+    dependencies: []
+
+  - domain: "AI Governance"
+    data_class: "AI Prompts & Reasoning Traces"
+    classification: "CONFIDENTIAL"
+    platform_minimum_retention_days: 180 # 6 months
+    active_days: 30
+    archive_strategy: "redacted_archive"
+    legal_hold_supported: true
+    is_system_locked: false
+    dependencies: []

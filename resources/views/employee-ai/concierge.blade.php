@@ -73,7 +73,7 @@
                             <div class="text-xs font-bold text-slate-200">{{ $sug['title'] }}</div>
                             <div class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{{ $sug['description'] }}</div>
                         </div>
-                        <button class="px-2.5 py-1 text-[11px] font-semibold rounded bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 whitespace-nowrap">
+                        <button onclick="sendPrompt('{{ addslashes($sug['title']) }}')" class="px-2.5 py-1 text-[11px] font-semibold rounded bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 whitespace-nowrap transition">
                             {{ $sug['action_label'] }}
                         </button>
                     </div>
@@ -84,13 +84,72 @@
 
         <!-- Prompt Input Bar -->
         <div class="sticky bottom-4">
-            <div class="relative flex items-center">
-                <input type="text" placeholder="Ask anything about leave, attendance, payslips, or HR policies..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 pl-4 pr-12 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-xl">
-                <button class="absolute right-2.5 w-8 h-8 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition">
+            <form id="ai-chat-box-form" onsubmit="handleConciergeSubmit(event)" class="relative flex items-center">
+                <input type="text" id="concierge-input" placeholder="Ask anything about leave, attendance, payslips, or HR policies..." required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 pl-4 pr-12 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-xl">
+                <button type="submit" id="btn-send-concierge" class="absolute right-2.5 w-8 h-8 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition">
                     <i class="fa-solid fa-arrow-up text-xs"></i>
                 </button>
-            </div>
+            </form>
         </div>
     </main>
+
+    <script>
+        function sendPrompt(text) {
+            const input = document.getElementById('concierge-input');
+            input.value = text;
+            handleConciergeSubmit(new Event('submit'));
+        }
+
+        async function handleConciergeSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('concierge-input');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+            input.value = '';
+
+            const btn = document.getElementById('btn-send-concierge');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+
+            try {
+                const res = await fetch('/api/me/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                const container = document.querySelector('.space-y-4');
+                if (container) {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'flex items-start justify-end space-x-3';
+                    userDiv.innerHTML = `<div class="bg-indigo-600 p-4 rounded-2xl max-w-xl text-sm text-white shadow-sm leading-relaxed">${prompt}</div>`;
+                    container.appendChild(userDiv);
+
+                    const aiDiv = document.createElement('div');
+                    aiDiv.className = 'flex items-start space-x-3';
+                    aiDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl max-w-2xl text-sm text-slate-200 shadow-sm leading-relaxed">
+                            ${data.response || data.message || 'I have analyzed your request based on current policies.'}
+                        </div>
+                    `;
+                    container.appendChild(aiDiv);
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            } catch (err) {
+                if (window.showNotification) {
+                    window.showNotification('error', 'Unable to process inquiry.');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up text-xs"></i>';
+            }
+        }
+    </script>
 </body>
 </html>

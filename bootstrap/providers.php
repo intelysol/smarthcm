@@ -8,4 +8,6 @@ return [
     AppServiceProvider::class,
     DomainServiceProvider::class,
     IdentityServiceProvider::class,
+    Flow\Packages\Integrations\Infrastructure\IntegrationsServiceProvider::class,
+    Flow\Packages\Billing\Infrastructure\BillingServiceProvider::class,
 ];

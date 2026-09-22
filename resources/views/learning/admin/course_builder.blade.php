@@ -11,7 +11,9 @@
         </div>
         <div style="display: flex; gap: 0.5rem;">
             <a href="{{ route('hcm.learning.courses') }}" class="btn btn-outline">Back to Courses</a>
-            <button class="btn btn-primary" onclick="alert('Course published successfully.')">Publish Course</button>
+            <button id="btn-publish-course" class="btn btn-primary" onclick="publishCourse('{{ $course->id }}')">
+                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publish Course
+            </button>
         </div>
     </div>
 
@@ -67,4 +69,41 @@
         @endif
     </div>
 </div>
+
+<script>
+    async function publishCourse(courseId) {
+        const btn = document.getElementById('btn-publish-course');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Publishing...';
+
+        try {
+            const res = await fetch(`/api/v1/hcm/learning/courses/${courseId}/publish`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            const data = await res.json();
+            if (res.ok && data.success !== false) {
+                if (window.showNotification) {
+                    window.showNotification('success', 'Course published to catalog successfully.');
+                }
+                setTimeout(() => location.reload(), 800);
+            } else {
+                if (window.showNotification) {
+                    window.showNotification('error', data.error?.message || data.message || 'Unable to publish course.');
+                }
+            }
+        } catch (err) {
+            if (window.showNotification) {
+                window.showNotification('error', 'Network error during course publishing.');
+            }
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publish Course';
+        }
+    }
+</script>
 @endsection

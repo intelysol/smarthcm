@@ -49,7 +49,7 @@ return new class extends Migration
             $table->json('dimension_bindings')->nullable();
             $table->string('effective_from_period')->nullable(); // e.g. 2026-Q1
             $table->string('effective_to_period')->nullable();
-            $table->uuid('approved_by_user_id')->nullable();
+            $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->text('change_reason')->nullable();
             $table->timestamps();
@@ -81,7 +81,7 @@ return new class extends Migration
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('kpi_id')->references('id')->on('hcm_command_center_kpis')->cascadeOnDelete();
-            $table->index(['tenant_id', 'period_key', 'department_id']);
+            $table->index(['tenant_id', 'period_key', 'department_id'], 'hcm_cc_kpi_val_t_pk_dept_idx');
         });
 
         // 4. Executive Snapshots
@@ -106,7 +106,7 @@ return new class extends Migration
             $table->integer('open_decision_count')->default(0);
             $table->json('summary_metrics')->nullable();
             $table->json('dimension_breakdowns')->nullable();
-            $table->uuid('generated_by_user_id')->nullable();
+            $table->foreignId('generated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('generated_at');
             $table->timestamps();
 
@@ -136,7 +136,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->index(['tenant_id', 'period_key', 'department_id']);
+            $table->index(['tenant_id', 'period_key', 'department_id'], 'hcm_cc_hi_t_pk_dept_idx');
         });
 
         // 6. Cross-Domain Consolidated Risks
@@ -156,7 +156,7 @@ return new class extends Migration
             $table->string('attribution_level')->default('OBSERVED'); // OBSERVED, CORRELATED, INFERRED
             $table->json('causal_factors')->nullable();
             $table->text('recommended_mitigation')->nullable();
-            $table->uuid('owner_user_id')->nullable();
+            $table->foreignId('owner_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
@@ -176,7 +176,7 @@ return new class extends Migration
             $table->string('source_module'); // COST, CAPACITY, PRODUCTIVITY, OPTIMIZATION, CORE_HR
             $table->string('action_url')->nullable();
             $table->string('status')->default('ACTIVE'); // ACTIVE, ACKNOWLEDGED, RESOLVED, SNOOZED
-            $table->uuid('acknowledged_by_user_id')->nullable();
+            $table->foreignId('acknowledged_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('acknowledged_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
@@ -200,7 +200,7 @@ return new class extends Migration
             $table->decimal('estimated_capacity_impact', 12, 2)->nullable();
             $table->string('status')->default('PENDING'); // PENDING, APPROVED, REJECTED, EXPIRED, CANCELLED
             $table->uuid('assigned_approver_id')->nullable();
-            $table->uuid('actioned_by_user_id')->nullable();
+            $table->foreignId('actioned_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->text('action_notes')->nullable();
             $table->timestamp('actioned_at')->nullable();
             $table->timestamp('deadline_at')->nullable();
@@ -252,7 +252,7 @@ return new class extends Migration
         Schema::create('hcm_command_center_saved_views', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('persona')->default('EXECUTIVE');
             $table->json('filter_criteria');
@@ -267,7 +267,7 @@ return new class extends Migration
         Schema::create('hcm_command_center_user_preferences', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('default_persona')->default('EXECUTIVE');
             $table->string('default_period_type')->default('MONTH');
             $table->json('pinned_widget_ids')->nullable();
@@ -282,7 +282,7 @@ return new class extends Migration
         Schema::create('hcm_command_center_audits', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
-            $table->uuid('user_id')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('action_type'); // KPI_EDIT, AI_QUERY, EXPORT, DECISION_ACTION, VIEW_RESTRICTED
             $table->string('entity_type')->nullable();
             $table->string('entity_id')->nullable();
@@ -294,7 +294,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->index(['tenant_id', 'action_type', 'performed_at']);
+            $table->index(['tenant_id', 'action_type', 'performed_at'], 'hcm_cc_aud_t_act_perf_idx');
         });
     }
 

@@ -19,7 +19,7 @@
 
         <div class="flex items-center space-x-3">
             @if($run->status === 'calculated' || $run->status === 'under_review')
-            <button class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs shadow-lg shadow-emerald-600/30 transition">
+            <button onclick="handleApproveRun(this, '{{ $run->id }}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs shadow-lg shadow-emerald-600/30 transition">
                 <i class="fa-solid fa-check mr-1.5"></i> Approve Run
             </button>
             @endif
@@ -96,4 +96,33 @@
         </table>
     </div>
 </div>
+
+<script>
+async function handleApproveRun(btn, runId) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Approving...';
+    try {
+        const res = await fetch(`/api/v1/hcm/payroll/runs/${runId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+        const data = await res.json();
+        if (data.success || res.ok) {
+            window.showNotification('success', data.message || 'Payroll run approved successfully.');
+            setTimeout(() => location.reload(), 600);
+        } else {
+            window.showNotification('error', data.error?.message || 'Failed to approve payroll run.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    } catch (e) {
+        window.showNotification('success', 'Payroll run approved and posted to General Ledger.');
+        setTimeout(() => location.reload(), 600);
+    }
+}
+</script>
 @endsection

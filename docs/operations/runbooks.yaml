@@ -1,0 +1,116 @@
+# Enterprise Application Platform — Runbook Index
+# Version: 2.75.0
+# Last Updated: 2026-09-22
+
+runbooks:
+  - id: rb-app-unhealthy
+    title: Application Unhealthy / 5xx Error Spikes
+    file: runbooks/application-unhealthy.md
+    severity_level: SEV-1
+    component: Application / Web
+    trigger: HTTP 5xx rate > 2.0% or /health returns degraded
+
+  - id: rb-db-failure
+    title: Database Connection Failure & High Latency
+    file: runbooks/database-failure.md
+    severity_level: SEV-0
+    component: Database / MySQL
+    trigger: db_connection_status == 0 or db_query_latency > 150ms
+
+  - id: rb-redis-failure
+    title: Redis In-Memory Store & Cache Failure
+    file: runbooks/redis-failure.md
+    severity_level: SEV-1
+    component: Cache / Redis
+    trigger: redis_status == 0 or cache timeouts
+
+  - id: rb-queue-backlog
+    title: Queue Backlog & Worker Saturation
+    file: runbooks/queue-backlog.md
+    severity_level: SEV-2
+    component: Queues / Workers
+    trigger: queue_pending_jobs > 1000
+
+  - id: rb-failed-jobs
+    title: Dead-Letter Queue & Failed Jobs Triage
+    file: runbooks/failed-jobs.md
+    severity_level: SEV-1
+    component: Queues / DLQ
+    trigger: failed_jobs_count > 50 in 5m
+
+  - id: rb-reverb-failure
+    title: Reverb WebSocket Broadcasting Failure
+    file: runbooks/reverb-failure.md
+    severity_level: SEV-2
+    component: Realtime / Reverb
+    trigger: reverb_connection_status == 0
+
+  - id: rb-storage-failure
+    title: Document & Asset Storage Failure
+    file: runbooks/storage-failure.md
+    severity_level: SEV-1
+    component: Storage / S3 / Local
+    trigger: Storage disk write probe failure or disk full
+
+  - id: rb-search-failure
+    title: Search Indexing & Query Failure
+    file: runbooks/search-failure.md
+    severity_level: SEV-2
+    component: Search Engine
+    trigger: Search query timeout or indexing failure
+
+  - id: rb-integration-failure
+    title: Third-Party Integration Partner Failure
+    file: runbooks/integration-failure.md
+    severity_level: SEV-2
+    component: Integration Hub
+    trigger: Outbound ERP/CRM sync error rate > 5%
+
+  - id: rb-webhook-failure
+    title: Webhook Delivery & Replay Triage
+    file: runbooks/webhook-failure.md
+    severity_level: SEV-3
+    component: Webhooks
+    trigger: webhook_failure_rate > 10.0%
+
+  - id: rb-notification-failure
+    title: Email, SMS & Push Notification Failure
+    file: runbooks/notification-failure.md
+    severity_level: SEV-2
+    component: Notification Hub
+    trigger: Notification delivery bounce rate > 5% or SMTP timeout
+
+  - id: rb-ai-provider-failure
+    title: LLM AI Provider Outage & Circuit Breaker
+    file: runbooks/ai-provider-failure.md
+    severity_level: SEV-3
+    component: AI Engine
+    trigger: ai_circuit_breaker_state == 1
+
+  - id: rb-billing-failure
+    title: Commercial Billing & Payment Processing Failure
+    file: runbooks/billing-failure.md
+    severity_level: SEV-1
+    component: Billing / Subscriptions
+    trigger: Payment webhook verification failed or subscription sync error
+
+  - id: rb-backup-failure
+    title: Database Backup & Point-in-Time Restore Failure
+    file: runbooks/backup-failure.md
+    severity_level: SEV-1
+    component: Backups / DR
+    trigger: Scheduled snapshot missed or verification failed
+
+  - id: rb-security-incident
+    title: Security Incident & Threat Containment
+    file: runbooks/security-incident.md
+    severity_level: SEV-0
+    component: Security / Zero-Trust
+    trigger: Cross-tenant access attempt anomaly, credential stuffing, or WAF alert
+
+  - id: rb-deployment-rollback
+    title: Deployment Rollback & Canary Reversion
+    file: runbooks/deployment-rollback.md
+    severity_level: SEV-1
+    component: Deployment / Release
+    trigger: Post-deploy error spike or migration regression

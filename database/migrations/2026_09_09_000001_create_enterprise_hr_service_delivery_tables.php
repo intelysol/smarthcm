@@ -451,7 +451,7 @@ return new class extends Migration {
 
             $table->foreign('hr_announcement_id')->references('id')->on('hr_announcements')->cascadeOnDelete();
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->unique(['hr_announcement_id', 'employee_id']);
+            $table->unique(['hr_announcement_id', 'employee_id'], 'hr_annc_ack_annc_emp_unique');
         });
     }
 

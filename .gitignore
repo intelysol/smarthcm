@@ -39,3 +39,5 @@ Thumbs.db
 AGENT.md
 CLAUDE.md
 .agent-mem/
+/storage/backups/
+/scratch/

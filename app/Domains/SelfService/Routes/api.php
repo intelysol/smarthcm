@@ -22,7 +22,7 @@ use App\Domains\SelfService\Http\Controllers\UnifiedServicePortalController;
 use Illuminate\Support\Facades\Route;
 
 // Standard Portal Routes
-Route::middleware('auth')->prefix('portal')->name('portal.')->group(function (): void {
+Route::middleware('auth')->prefix('portal')->name('api.portal.')->group(function (): void {
     Route::get('dashboard', [PortalDashboardController::class, 'employee'])->name('dashboard');
     Route::get('manager/dashboard', [PortalDashboardController::class, 'manager'])->name('manager.dashboard');
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');

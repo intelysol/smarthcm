@@ -14,7 +14,7 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <button class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-pink-600/20 flex items-center gap-2">
+            <button onclick="document.getElementById('report-life-event-modal').classList.remove('hidden')" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-pink-600/20 flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> Report Life Event
             </button>
         </div>
@@ -77,7 +77,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <button class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs transition border border-slate-700">
+                                <button onclick="handleVerifyDocs(this)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs transition border border-slate-700">
                                     Verify Docs
                                 </button>
                             </td>
@@ -94,4 +94,59 @@
         </div>
     </div>
 </div>
+
+<!-- Report Life Event Modal -->
+<div id="report-life-event-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white">Report Qualifying Life Event</h3>
+            <button onclick="document.getElementById('report-life-event-modal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form onsubmit="handleReportLifeEvent(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Event Type</label>
+                <select required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500">
+                    <option value="marriage">Marriage</option>
+                    <option value="birth">Birth of Child</option>
+                    <option value="adoption">Adoption / Placement</option>
+                    <option value="divorce">Divorce / Legal Separation</option>
+                    <option value="loss_coverage">Loss of Other Minimum Coverage</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date of Event</label>
+                <input type="date" required value="{{ now()->toDateString() }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Supporting Document</label>
+                <input type="file" class="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700">
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('report-life-event-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-pink-600/30 transition">Submit Event</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleReportLifeEvent(e) {
+    e.preventDefault();
+    document.getElementById('report-life-event-modal').classList.add('hidden');
+    window.showNotification('success', 'Qualifying life event reported. Special enrollment window opened for 30 days.');
+}
+
+function handleVerifyDocs(btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Verified';
+        btn.className = 'px-3 py-1 bg-emerald-900/60 text-emerald-400 border border-emerald-700/60 rounded text-xs';
+        window.showNotification('success', 'Documentation verified and eligibility window confirmed.');
+    }, 400);
+}
+</script>
 @endsection

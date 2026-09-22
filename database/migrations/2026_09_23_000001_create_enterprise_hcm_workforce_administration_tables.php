@@ -70,7 +70,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
             $table->uuid('exception_id')->index();
-            $table->uuid('assigned_user_id')->nullable()->index();
+            $table->foreignId('assigned_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('assigned_team', 80)->nullable();
             $table->uuid('assigned_by')->nullable()->index();
             $table->timestamp('assigned_at')->useCurrent();

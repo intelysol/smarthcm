@@ -1,0 +1,121 @@
+# Enterprise Application Platform — Operational Alert Rules
+# Version: 2.75.0
+# Last Updated: 2026-09-22
+
+rules:
+  # Database & Storage
+  - id: alert-db-down
+    name: Database Connection Failure
+    metric: db_connection_status
+    operator: '='
+    threshold: 0
+    window: 1m
+    severity: critical
+    channels: [slack-ops-critical, pagerduty-sre, email-oncall]
+    runbook: runbooks/database-failure.md
+    description: Database ping failed or returned PDO connection timeout.
+
+  - id: alert-db-latency-high
+    name: Database Query Latency Spiking
+    metric: db_query_latency_ms
+    operator: '>'
+    threshold: 150
+    window: 5m
+    severity: warning
+    channels: [slack-ops-warning]
+    runbook: runbooks/database-failure.md
+    description: Average query latency exceeded 150ms over 5 consecutive minutes.
+
+  # Cache & Redis
+  - id: alert-redis-unreachable
+    name: Redis In-Memory Store Unreachable
+    metric: redis_status
+    operator: '='
+    threshold: 0
+    window: 2m
+    severity: critical
+    channels: [slack-ops-critical, pagerduty-sre]
+    runbook: runbooks/redis-failure.md
+    description: Redis ping failed, fallback to file/database active.
+
+  # Queue & Dead-Letter Queue
+  - id: alert-queue-backlog-high
+    name: Queue Backlog Saturation
+    metric: queue_pending_jobs
+    operator: '>'
+    threshold: 1000
+    window: 5m
+    severity: warning
+    channels: [slack-ops-warning]
+    runbook: runbooks/queue-backlog.md
+    description: Total pending background jobs exceeded 1,000. Worker auto-scaling recommended.
+
+  - id: alert-failed-jobs-spike
+    name: Dead-Letter Queue / Failed Jobs Influx
+    metric: failed_jobs_count
+    operator: '>'
+    threshold: 50
+    window: 5m
+    severity: critical
+    channels: [slack-ops-critical, email-oncall]
+    runbook: runbooks/failed-jobs.md
+    description: Over 50 jobs terminated into failed_jobs table within 5 minutes.
+
+  # HTTP & API Gateway
+  - id: alert-http-5xx-rate
+    name: Elevated HTTP 5xx Server Error Rate
+    metric: http_5xx_percentage
+    operator: '>'
+    threshold: 2.0
+    window: 5m
+    severity: critical
+    channels: [slack-ops-critical, pagerduty-sre]
+    runbook: runbooks/application-unhealthy.md
+    description: More than 2% of incoming web/API requests resulted in HTTP 500/502/503.
+
+  - id: alert-api-latency-p95
+    name: HTTP API p95 Latency Degradation
+    metric: http_p95_latency_ms
+    operator: '>'
+    threshold: 500
+    window: 10m
+    severity: warning
+    channels: [slack-ops-warning]
+    runbook: runbooks/application-unhealthy.md
+    description: 95th percentile response time exceeded 500ms across API endpoints.
+
+  # WebSocket / Realtime
+  - id: alert-reverb-down
+    name: Reverb WebSocket Daemon Disconnected
+    metric: reverb_connection_status
+    operator: '='
+    threshold: 0
+    window: 2m
+    severity: warning
+    channels: [slack-ops-warning]
+    runbook: runbooks/reverb-failure.md
+    description: WebSocket server failed heartbeats. Real-time updates degraded to HTTP polling.
+
+  # Integration & Webhooks
+  - id: alert-webhook-delivery-failure
+    name: Outbound Webhook Delivery Failures High
+    metric: webhook_failure_rate
+    operator: '>'
+    threshold: 10.0
+    window: 15m
+    severity: warning
+    channels: [slack-ops-warning]
+    runbook: runbooks/webhook-failure.md
+    description: Third-party integration webhook failure rate exceeded 10%.
+
+  # AI Provider
+  - id: alert-ai-circuit-breaker-open
+    name: AI Provider Circuit Breaker Tripped
+    metric: ai_circuit_breaker_state
+    operator: '='
+    threshold: 1
+    window: 1m
+    severity: warning
+    channels: [slack-ops-warning]
+    runbook: runbooks/ai-provider-failure.md
+    description: External LLM gateway returned excessive rate limits or errors. Fallback active.

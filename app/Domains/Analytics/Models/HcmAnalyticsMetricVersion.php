@@ -46,4 +46,9 @@ class HcmAnalyticsMetricVersion extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function getFormulaAttribute(): ?string
+    {
+        return $this->calculation_definition['formula'] ?? null;
+    }
 }

@@ -22,7 +22,7 @@
             <a href="{{ route('onboarding.portal') }}" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm transition">
                 <i class="fa-solid fa-user-check mr-1.5 text-emerald-600"></i>New Hire View
             </a>
-            <button class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">
+            <button onclick="document.getElementById('start-onboarding-modal').classList.remove('hidden')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">
                 <i class="fa-solid fa-plus mr-1.5"></i>Start Onboarding Case
             </button>
         </div>
@@ -258,4 +258,59 @@
     </div>
 
 </div>
+
+<!-- Start Onboarding Case Modal -->
+<div id="start-onboarding-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Initiate New Hire Onboarding</h3>
+            <button onclick="document.getElementById('start-onboarding-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+        </div>
+        <form onsubmit="handleStartOnboarding(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Candidate / New Hire Name</label>
+                <input type="text" required placeholder="e.g. Alex Morgan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Personal Email Address</label>
+                <input type="email" required placeholder="alex.morgan@email.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Department</label>
+                    <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-500">
+                        <option value="engineering">Engineering</option>
+                        <option value="operations">Operations</option>
+                        <option value="sales">Commercial & Sales</option>
+                        <option value="hr">People & Talent</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">First Day / Join Date</label>
+                    <input type="date" required value="{{ now()->addDays(14)->toDateString() }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Onboarding Template</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-500">
+                    <option value="standard">Standard Full-Time Professional (90-Day Journey)</option>
+                    <option value="executive">Leadership & Executive Fast-Track</option>
+                    <option value="remote">Remote-First Engineer Protocol</option>
+                </select>
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('start-onboarding-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Launch Case</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleStartOnboarding(e) {
+    e.preventDefault();
+    document.getElementById('start-onboarding-modal').classList.add('hidden');
+    window.showNotification('success', 'Onboarding journey launched. Welcome email dispatched and preboarding portal unlocked.');
+}
+</script>
 @endsection

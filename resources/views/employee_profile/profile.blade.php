@@ -39,9 +39,9 @@
             <a href="{{ route('employee_profile.org_chart') }}" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm transition">
                 <i class="fa-solid fa-sitemap mr-1.5 text-indigo-600"></i>Focus in Org Chart
             </a>
-            <button class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">
-                <i class="fa-solid fa-pen-to-square mr-1.5"></i>Request Profile Update
-            </button>
+            <a href="{{ route('personal-data.change-requests') }}" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">
+                <i class="fa-solid fa-pen-to-square mr-1.5"></i>Manage Change Requests
+            </a>
         </div>
     </div>
 

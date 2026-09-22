@@ -47,7 +47,7 @@ return new class extends Migration {
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('plan_id')->references('id')->on('hcm_workforce_plans')->cascadeOnDelete();
-            $table->unique(['tenant_id', 'plan_id', 'version_number']);
+            $table->unique(['tenant_id', 'plan_id', 'version_number'], 'hcm_wf_plan_ver_plan_num_unique');
         });
 
         Schema::create('hcm_workforce_plan_periods', function (Blueprint $table) {

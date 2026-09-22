@@ -1031,7 +1031,7 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $table->foreign('financial_wellness_program_id')->references('id')->on('financial_wellness_programs')->nullOnDelete();
+                $table->foreign('financial_wellness_program_id', 'fk_fin_well_res_prog_id')->references('id')->on('financial_wellness_programs')->nullOnDelete();
             });
         }
     }

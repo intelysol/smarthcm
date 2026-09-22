@@ -12,10 +12,10 @@
             <p class="text-sm text-slate-300 mt-1">View your shift roster, clock in/out with geolocation, and request regularizations.</p>
         </div>
         <div class="flex items-center gap-3">
-            <button class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+            <button onclick="handleAttendancePunch(this, 'CHECK_IN')" class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
                 <i class="fa-solid fa-right-to-bracket"></i> Clock In
             </button>
-            <button class="px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-lg shadow-rose-600/30 transition flex items-center gap-2">
+            <button onclick="handleAttendancePunch(this, 'CHECK_OUT')" class="px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-lg shadow-rose-600/30 transition flex items-center gap-2">
                 <i class="fa-solid fa-right-from-bracket"></i> Clock Out
             </button>
         </div>
@@ -41,4 +41,33 @@
         </div>
     </div>
 </div>
+
+<script>
+async function handleAttendancePunch(btn, eventType) {
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+    try {
+        const res = await fetch('/api/me/attendance/clock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ action: eventType === 'CHECK_IN' ? 'clock_in' : 'clock_out' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.showNotification('success', (eventType === 'CHECK_IN' ? 'Clocked in' : 'Clocked out') + ' successfully.');
+        } else {
+            window.showNotification('error', data.error?.message || 'Failed to record attendance punch.');
+        }
+    } catch (err) {
+        window.showNotification('error', 'Network error while recording punch.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+    }
+}
+</script>
 @endsection

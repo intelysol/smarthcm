@@ -158,7 +158,7 @@ return new class extends Migration
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('case_id')->references('id')->on('employee_relation_cases')->cascadeOnDelete();
-            $table->index(['tenant_id', 'user_id', 'status']);
+            $table->index(['tenant_id', 'user_id', 'status'], 'er_case_assign_ten_usr_stat_idx');
         });
 
         // 8. Case Participants
@@ -234,7 +234,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->foreign('investigation_id')->references('id')->on('employee_relation_investigations')->cascadeOnDelete();
+            $table->foreign('investigation_id', 'fk_er_inv_step_inv_id')->references('id')->on('employee_relation_investigations')->cascadeOnDelete();
             $table->foreign('case_id')->references('id')->on('employee_relation_cases')->cascadeOnDelete();
         });
 
@@ -254,7 +254,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->foreign('investigation_id')->references('id')->on('employee_relation_investigations')->cascadeOnDelete();
+            $table->foreign('investigation_id', 'fk_er_inv_q_inv_id')->references('id')->on('employee_relation_investigations')->cascadeOnDelete();
             $table->foreign('case_id')->references('id')->on('employee_relation_cases')->cascadeOnDelete();
             $table->foreign('participant_id')->references('id')->on('employee_relation_case_participants')->nullOnDelete();
         });
@@ -311,7 +311,7 @@ return new class extends Migration
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('statement_id')->references('id')->on('employee_relation_statements')->cascadeOnDelete();
-            $table->unique(['statement_id', 'version_number']);
+            $table->unique(['statement_id', 'version_number'], 'er_stmt_ver_stmt_ver_unique');
         });
 
         // 16. Interviews
@@ -526,7 +526,7 @@ return new class extends Migration
             $table->uuid('decision_id')->nullable()->index();
             $table->string('action_type', 50)->default('counselling'); // training, counselling, policy_acknowledgement, behavior_plan, attendance_improvement, performance_follow_up, written_warning, custom
             $table->text('description');
-            $table->uuid('assigned_to_employee_id')->index();
+            $table->uuid('assigned_to_employee_id')->index('er_corr_act_emp_id_idx');
             $table->foreignId('supervisor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->date('start_date');
             $table->date('due_date');
@@ -542,7 +542,7 @@ return new class extends Migration
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('case_id')->references('id')->on('employee_relation_cases')->cascadeOnDelete();
             $table->foreign('decision_id')->references('id')->on('employee_relation_decisions')->nullOnDelete();
-            $table->foreign('assigned_to_employee_id')->references('id')->on('employees')->cascadeOnDelete();
+            $table->foreign('assigned_to_employee_id', 'fk_er_corr_act_emp_id')->references('id')->on('employees')->cascadeOnDelete();
         });
 
         // 28. Appeals

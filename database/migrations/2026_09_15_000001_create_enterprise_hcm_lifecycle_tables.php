@@ -62,7 +62,7 @@ return new class extends Migration {
         Schema::create('personnel_action_changes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
-            $table->uuid('personnel_action_request_id')->index();
+            $table->uuid('personnel_action_request_id')->index('pa_chg_par_id_idx');
             $table->string('field_name', 80); // department_id, position_id, job_grade_id, base_salary, reporting_manager_id, etc.
             $table->string('entity_type', 80)->default('employee'); // employee, employment, assignment
             $table->string('entity_id', 80)->nullable();
@@ -82,7 +82,7 @@ return new class extends Migration {
         Schema::create('personnel_action_impacts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
-            $table->uuid('personnel_action_request_id')->index();
+            $table->uuid('personnel_action_request_id')->index('pa_imp_par_id_idx');
             $table->string('domain', 50); // core_hr, payroll, benefits, attendance, learning, position, workflow
             $table->string('impact_type', 50); // salary_recalc, position_vacated, benefit_reeval, etc.
             $table->string('severity', 20)->default('info'); // info, warning, blocking
@@ -100,7 +100,7 @@ return new class extends Migration {
         Schema::create('personnel_action_acknowledgements', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
-            $table->uuid('personnel_action_request_id')->index();
+            $table->uuid('personnel_action_request_id')->index('pa_ack_par_id_idx');
             $table->uuid('employee_id')->index();
             $table->string('status', 30)->default('pending'); // not_required, pending, acknowledged, declined, expired
             $table->timestamp('acknowledged_at')->nullable();
@@ -109,7 +109,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->foreign('personnel_action_request_id')->references('id')->on('personnel_action_requests')->cascadeOnDelete();
+            $table->foreign('personnel_action_request_id', 'fk_pa_ack_par_id')->references('id')->on('personnel_action_requests')->cascadeOnDelete();
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             $table->unique(['personnel_action_request_id', 'employee_id'], 'pa_ack_unique');
         });
@@ -119,7 +119,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
             $table->uuid('employee_id')->index();
-            $table->uuid('personnel_action_request_id')->nullable()->index();
+            $table->uuid('personnel_action_request_id')->nullable()->index('pta_par_id_idx');
             $table->string('assignment_type', 40); // temporary, acting, secondment, deputation
             $table->uuid('home_department_id')->nullable()->index();
             $table->uuid('temporary_department_id')->nullable()->index();
@@ -135,14 +135,14 @@ return new class extends Migration {
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
-            $table->foreign('personnel_action_request_id')->references('id')->on('personnel_action_requests')->nullOnDelete();
+            $table->foreign('personnel_action_request_id', 'fk_pta_par_id')->references('id')->on('personnel_action_requests')->nullOnDelete();
         });
 
         // 7. Personnel Action Generated Documents & Letters
         Schema::create('personnel_action_documents', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
-            $table->uuid('personnel_action_request_id')->index();
+            $table->uuid('personnel_action_request_id')->index('pa_doc_par_id_idx');
             $table->string('document_type', 50); // promotion_letter, transfer_letter, salary_revision_letter
             $table->string('title', 150);
             $table->string('file_path');
@@ -168,7 +168,7 @@ return new class extends Migration {
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('original_action_id')->references('id')->on('personnel_action_requests')->cascadeOnDelete();
             $table->foreign('reversal_action_id')->references('id')->on('personnel_action_requests')->cascadeOnDelete();
-            $table->unique(['original_action_id', 'reversal_action_id']);
+            $table->unique(['original_action_id', 'reversal_action_id'], 'pa_rev_orig_rev_unique');
         });
 
         // 9. Bulk Batches & Items
@@ -218,7 +218,7 @@ return new class extends Migration {
         Schema::create('personnel_action_audits', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id')->index();
-            $table->uuid('personnel_action_request_id')->index();
+            $table->uuid('personnel_action_request_id')->index('pa_aud_par_id_idx');
             $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('action_event', 50); // created, submitted, validated, approved, rejected, scheduled, executed, cancelled, reversed
             $table->json('old_values')->nullable();

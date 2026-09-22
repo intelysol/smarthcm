@@ -459,7 +459,7 @@ return new class extends Migration {
             $t->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             $t->foreign('course_id')->references('id')->on('learning_courses')->cascadeOnDelete();
             $t->foreign('enrollment_id')->references('id')->on('learning_enrollments')->nullOnDelete();
-            $t->unique(['requirement_id', 'employee_id']);
+            $t->unique(['requirement_id', 'employee_id'], 'lr_assign_req_emp_uq');
         });
 
         Schema::create('learning_progress', function (Blueprint $t): void {
@@ -530,7 +530,7 @@ return new class extends Migration {
             $t->foreign('assessment_id')->references('id')->on('learning_assessments')->cascadeOnDelete();
             $t->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
             $t->foreign('enrollment_id')->references('id')->on('learning_enrollments')->nullOnDelete();
-            $t->unique(['assessment_id', 'employee_id', 'attempt_number']);
+            $t->unique(['assessment_id', 'employee_id', 'attempt_number'], 'lr_attempt_asmt_emp_num_uq');
         });
 
         Schema::create('learning_assessment_answers', function (Blueprint $t): void {

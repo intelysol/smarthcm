@@ -1,0 +1,232 @@
+# Enterprise Application Platform — Recovery Objectives (RPO & RTO)
+# Version: 2.76.0
+# Last Updated: 2026-09-22
+
+recovery_objectives:
+  # -------------------------------------------------------------------
+  # TIER 0: Platform Critical Infrastructure
+  # -------------------------------------------------------------------
+  - service: Primary Relational Database
+    service_id: core-database
+    tier: tier-0
+    rpo_minutes: 15
+    rto_minutes: 60
+    backup_frequency: Continuous WAL/binlogs + 24h Full mysqldump
+    retention: 30 days daily, 12 months monthly
+    restore_method: Point-in-time recovery via cold snapshot + binlog replay
+    validation: Schema integrity verification + orphan checks + checksum audit
+    owner: Database Operations & Infrastructure Team
+    rationale: Authoritative system of record for 1,000+ tables; loss > 15m violates financial and statutory compliance.
+
+  - service: Authentication & Identity Management
+    service_id: core-auth-identity
+    tier: tier-0
+    rpo_minutes: 0
+    rto_minutes: 15
+    backup_frequency: Ephemeral state rebuildable from DB + Session store
+    retention: Session lifetime (120m)
+    restore_method: Stateless container restart with Redis session fallback
+    validation: Token verification + MFA challenge smoke test
+    owner: Identity & Security Engineering
+    rationale: Ingress gate for all platform users; prolonged downtime halts all operations.
+
+  - service: Multi-Tenant Isolation Engine
+    service_id: multi-tenancy-engine
+    tier: tier-0
+    rpo_minutes: 0
+    rto_minutes: 15
+    backup_frequency: Embedded in Core DB schema
+    retention: Permanent
+    restore_method: Automatic instantiation via TenantContext middleware
+    validation: Cross-tenant boundary test suite
+    owner: Core Architecture Team
+    rationale: Essential for compliance; zero cross-tenant contamination permitted.
+
+  - service: Secure Document & Asset Storage
+    service_id: blob-storage
+    tier: tier-0
+    rpo_minutes: 15
+    rto_minutes: 60
+    backup_frequency: S3 Cross-Region Replication (CRR) + Object Lock
+    retention: 7 years compliance archive
+    restore_method: S3 bucket versioning rollback / secondary region failover
+    validation: SHA-256 cryptographic checksum matching
+    owner: Cloud Infrastructure Team
+    rationale: Stores legally binding contracts, payslips, tax forms, and employee identification.
+
+  - service: Operational Cache & Session Store
+    service_id: core-cache
+    tier: tier-0
+    rpo_minutes: 60
+    rto_minutes: 15
+    backup_frequency: Hourly Redis RDB snapshots
+    retention: 48 hours
+    restore_method: Redis instance restart or failover to replica
+    validation: Redis ping + memory and key eviction audit
+    owner: SRE Team
+    rationale: Caches permissions, rate-limit buckets, and sessions. Data is rebuildable from database.
+
+  - service: Background Queue & Job Distribution Engine
+    service_id: queue-broker
+    tier: tier-0
+    rpo_minutes: 5
+    rto_minutes: 30
+    backup_frequency: Redis persistent append-only file (AOF)
+    retention: 72 hours
+    restore_method: Worker cluster restart + DLQ failed-jobs reingestion
+    validation: Queue depth audit + failed_jobs table counter
+    owner: SRE & Platform Team
+    rationale: Coordinates asynchronous batch calculations, webhooks, and transactional emails.
+
+  # -------------------------------------------------------------------
+  # TIER 1: Business Critical Operations
+  # -------------------------------------------------------------------
+  - service: Core HCM & Employee Lifecycle
+    service_id: hcm-core
+    tier: tier-1
+    rpo_minutes: 15
+    rto_minutes: 60
+    backup_frequency: Backed up with primary database
+    retention: 30 days
+    restore_method: Database restore + employee search index rebuild
+    validation: Employee record integrity + department hierarchy audit
+    owner: HCM Engineering Team
+    rationale: Central organizational data structure for all enterprise operations.
+
+  - service: Enterprise Payroll Engine
+    service_id: payroll-engine
+    tier: tier-1
+    rpo_minutes: 0
+    rto_minutes: 120
+    backup_frequency: Backed up with primary database + immutable payslip PDFs
+    retention: 10 years statutory
+    restore_method: Database restore + reconciliation against banking exports
+    validation: Gross-to-net idempotency check + duplicate calculation prevention
+    owner: Payroll Engineering Team
+    rationale: Financial transactions; accidental duplicate execution causes severe compliance damage.
+
+  - service: Time & Attendance Engine
+    service_id: time-and-attendance
+    tier: tier-1
+    rpo_minutes: 60
+    rto_minutes: 120
+    backup_frequency: Backed up with primary database
+    retention: 5 years
+    restore_method: Database restore + device biometric buffer resynchronization
+    validation: Punch timestamp sequencing + biometric device connectivity probe
+    owner: Workforce Management Team
+    rationale: Daily clock-in/out records for shift workers; buffer allows device offline caching.
+
+  - service: Performance Management & Goals
+    service_id: performance-appraisal
+    tier: tier-1
+    rpo_minutes: 60
+    rto_minutes: 240
+    backup_frequency: Backed up with primary database
+    retention: 5 years
+    restore_method: Database restore
+    validation: Appraisal cycle status + goal score consistency
+    owner: Talent Management Team
+    rationale: Non-blocking for daily operations, but critical during annual appraisal cycles.
+
+  - service: Recruitment & Applicant Tracking
+    service_id: recruitment-ats
+    tier: tier-1
+    rpo_minutes: 60
+    rto_minutes: 240
+    backup_frequency: Backed up with primary database + CV document attachments
+    retention: 3 years
+    restore_method: Database restore + candidate resume storage verification
+    validation: Pipeline requisition status + resume file accessibility
+    owner: Talent Acquisition Team
+    rationale: External candidate touchpoint; resume files must match database metadata.
+
+  # -------------------------------------------------------------------
+  # TIER 2: Important Business Workflows
+  # -------------------------------------------------------------------
+  - service: Multi-Step Approval & Workflow Engine
+    service_id: workflow-engine
+    tier: tier-2
+    rpo_minutes: 60
+    rto_minutes: 240
+    backup_frequency: Backed up with primary database
+    retention: 5 years
+    restore_method: Database restore + state machine resumption
+    validation: Pending approvals audit + transition history integrity
+    owner: Workflow Architecture Team
+    rationale: Leave, expense, and promotion approvals. State machine guarantees no duplicate steps.
+
+  - service: Executive Analytics & Governed KPI Engine
+    service_id: analytics-engine
+    tier: tier-2
+    rpo_minutes: 240
+    rto_minutes: 480
+    backup_frequency: Rebuildable from transactional tables
+    retention: Current active period
+    restore_method: Re-execution of analytical aggregation pipeline
+    validation: KPI checksum comparison against transactional tables
+    owner: Business Intelligence Team
+    rationale: Analytical presentation layer; 100% reconstructible from transactional source data.
+
+  - service: Unified Multi-Channel Notifications Hub
+    service_id: notifications-hub
+    tier: tier-2
+    rpo_minutes: 60
+    rto_minutes: 240
+    backup_frequency: Backed up with primary database
+    retention: 90 days
+    restore_method: Database restore + provider queue drain
+    validation: Unsent notification queue audit + bounce check
+    owner: Core Platform Team
+    rationale: Transactional emails and alerts. Duplicates must be suppressed via idempotency keys.
+
+  - service: Real-Time Event Broadcasting (Reverb)
+    service_id: realtime-broadcasting
+    tier: tier-2
+    rpo_minutes: 0
+    rto_minutes: 60
+    backup_frequency: Stateless daemon
+    retention: None
+    restore_method: Daemon restart via Supervisor
+    validation: WebSocket handshake + echo test
+    owner: SRE Team
+    rationale: Live UI notifications and dashboard streaming. Web clients fall back to HTTP polling.
+
+  - service: Enterprise Integration & Webhook Delivery
+    service_id: integration-hub
+    tier: tier-2
+    rpo_minutes: 60
+    rto_minutes: 240
+    backup_frequency: Backed up with primary database
+    retention: 180 days
+    restore_method: Database restore + checkpoint replay
+    validation: Outbound webhook retry queue + partner endpoint handshake
+    owner: Integration Engineering Team
+    rationale: External ERP/CRM synchronization; checkpoint replay prevents duplicate deliveries.
+
+  # -------------------------------------------------------------------
+  # TIER 3: Non-Critical / Auxiliary Services
+  # -------------------------------------------------------------------
+  - service: HCM AI Concierge & Assistant
+    service_id: ai-concierge
+    tier: tier-3
+    rpo_minutes: 1440
+    rto_minutes: 1440
+    backup_frequency: Prompt versioning in Git + use-case definitions in DB
+    retention: 1 year
+    restore_method: Git deployment + circuit breaker reset
+    validation: AI concierge probe + fallback to deterministic mode
+    owner: AI Platform Team
+    rationale: Optional productivity assistant; system operates normally in deterministic mode if AI is down.
+
+  - service: Commercial Billing & Invoicing
+    service_id: commercial-billing
+    tier: tier-3
+    rpo_minutes: 60
+    rto_minutes: 480
+    backup_frequency: Backed up with primary database + Stripe webhook reconciliation
+    retention: 10 years statutory
+    restore_method: Database restore + Stripe event replay
+    validation: Subscription entitlement match + invoice balance reconciliation
+    owner: Finance & Commercial Operations Team
+    rationale: Subscription management; 7-day grace period ensures customer access is not cut off during outage.

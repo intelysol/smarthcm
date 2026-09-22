@@ -8,4 +8,45 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Epic 2.70 Centralized Corporate Design Tokens */
+    --color-brand-primary: #1E3A5F;
+    --color-brand-dark: #142A44;
+    --color-brand-gold: #C9A227;
+    --color-brand-gold-light: #F4E7B2;
+    --color-brand-background: #F7F9FC;
+    --color-brand-surface: #FFFFFF;
+    --color-brand-text: #1F2937;
+    --color-brand-muted: #6B7280;
+    --color-brand-border: #E5E7EB;
+
+    --color-brand-success: #16805C;
+    --color-brand-warning: #B7791F;
+    --color-brand-danger: #C0392B;
+    --color-brand-info: #2563EB;
+}
+
+:root {
+    --color-primary: #1E3A5F;
+    --color-primary-dark: #142A44;
+    --color-accent: #C9A227;
+    --color-accent-light: #F4E7B2;
+    --color-background: #F7F9FC;
+    --color-surface: #FFFFFF;
+    --color-text: #1F2937;
+    --color-text-muted: #6B7280;
+    --color-border: #E5E7EB;
+    --color-success: #16805C;
+    --color-warning: #B7791F;
+    --color-danger: #C0392B;
+    --color-info: #2563EB;
+
+    /* Spacing System */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
 }

@@ -156,8 +156,8 @@ return new class extends Migration
             Schema::create('compensation_calibration_records', function (Blueprint $t): void {
                 $t->uuid('id')->primary();
                 $t->uuid('tenant_id')->index();
-                $t->uuid('compensation_calibration_session_id')->index();
-                $t->uuid('compensation_recommendation_id')->index();
+                $t->uuid('compensation_calibration_session_id')->index('idx_comp_calib_rec_sess');
+                $t->uuid('compensation_recommendation_id')->index('idx_comp_calib_rec_recom');
                 $t->decimal('original_increase_pct', 8, 4);
                 $t->decimal('original_increase_amount', 15, 2);
                 $t->decimal('calibrated_increase_pct', 8, 4);
@@ -168,8 +168,8 @@ return new class extends Migration
                 $t->timestamps();
 
                 $t->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-                $t->foreign('compensation_calibration_session_id')->references('id')->on('compensation_calibration_sessions')->cascadeOnDelete();
-                $t->foreign('compensation_recommendation_id')->references('id')->on('compensation_recommendations')->cascadeOnDelete();
+                $t->foreign('compensation_calibration_session_id', 'fk_comp_calib_rec_session')->references('id')->on('compensation_calibration_sessions')->cascadeOnDelete();
+                $t->foreign('compensation_recommendation_id', 'fk_comp_calib_rec_recom')->references('id')->on('compensation_recommendations')->cascadeOnDelete();
             });
         }
 

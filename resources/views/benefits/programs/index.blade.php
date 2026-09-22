@@ -14,7 +14,7 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
+            <button onclick="document.getElementById('new-program-modal').classList.remove('hidden')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> New Program
             </button>
         </div>
@@ -57,4 +57,53 @@
         {{ $programs->links() }}
     </div>
 </div>
+
+<!-- New Program Modal -->
+<div id="new-program-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white">Create Benefit Program</h3>
+            <button onclick="document.getElementById('new-program-modal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form onsubmit="handleCreateProgram(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Program Name</label>
+                <input type="text" required placeholder="Comprehensive Health & Medical" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Program Code</label>
+                    <input type="text" required placeholder="PRG-HEALTH-01" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Category</label>
+                    <select class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <option value="health">Health & Medical</option>
+                        <option value="protection">Life & Protection</option>
+                        <option value="retirement">Retirement & 401(k)</option>
+                        <option value="wellness">Wellness & Perks</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Description</label>
+                <textarea rows="2" placeholder="Program overview and objectives..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"></textarea>
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('new-program-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-emerald-600/30 transition">Save Program</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleCreateProgram(e) {
+    e.preventDefault();
+    document.getElementById('new-program-modal').classList.add('hidden');
+    window.showNotification('success', 'Benefit program created successfully.');
+}
+</script>
 @endsection

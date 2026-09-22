@@ -67,7 +67,7 @@ return new class extends Migration
                 $table->uuid('employee_id')->index();
                 $table->date('impact_date')->index();
                 $table->uuid('affected_shift_id')->nullable()->index();
-                $table->uuid('affected_roster_assignment_id')->nullable()->index();
+                $table->uuid('affected_roster_assignment_id')->nullable()->index('hcm_abs_op_roster_asgn_idx');
                 $table->decimal('scheduled_hours', 5, 2)->default(8.00);
                 $table->decimal('lost_capacity_hours', 5, 2)->default(8.00);
                 $table->uuid('department_id')->nullable()->index();

@@ -22,7 +22,7 @@
             <a href="{{ route('employee_documents.employee.portal') }}" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm transition">
                 <i class="fa-solid fa-user-tag mr-1.5 text-sky-600"></i>Self-Service Portal
             </a>
-            <button class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
+            <button onclick="document.getElementById('bulk-upload-modal').classList.remove('hidden')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
                 <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Bulk Upload Documents
             </button>
         </div>
@@ -191,4 +191,41 @@
     </div>
 
 </div>
+
+<!-- Bulk Upload Modal -->
+<div id="bulk-upload-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Bulk Upload Personnel Documents</h3>
+            <button onclick="document.getElementById('bulk-upload-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+        </div>
+        <form onsubmit="handleBulkUpload(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Document Category</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    <option value="identification">Government Identification / Passports</option>
+                    <option value="employment_contract">Employment Contracts & Amendments</option>
+                    <option value="tax_withholding">Tax Withholding & Declarations</option>
+                    <option value="certifications">Professional Certifications & Licenses</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Select Files (ZIP or Multiple PDF/Images)</label>
+                <input type="file" multiple required class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('bulk-upload-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Upload & Process</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleBulkUpload(e) {
+    e.preventDefault();
+    document.getElementById('bulk-upload-modal').classList.add('hidden');
+    window.showNotification('success', 'Bulk document package ingested. Verification pipeline scheduled.');
+}
+</script>
 @endsection

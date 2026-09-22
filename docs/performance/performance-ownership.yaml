@@ -1,0 +1,88 @@
+# Enterprise Application Platform — Performance Test Ownership Matrix
+# Version: 2.77.0
+# Last Updated: 2026-09-22
+
+ownership_matrix:
+  - test_id: perf-test-auth-latency
+    domain: Identity & Access
+    primary_owner: Identity Lead
+    qa_owner: QA Performance Engineer
+    platform_owner: Platform SRE Lead
+    dataset: 5,000 Users, 50 Tenants
+    load_profile: 1,000 concurrent authentications / min
+    target: P95 < 50ms, Error Rate 0.0%
+    result: P95 = 28ms, Error Rate 0.0%
+    last_run: "2026-09-22T09:00:00Z"
+    status: PASSED
+
+  - test_id: perf-test-employee-directory
+    domain: Core HCM
+    primary_owner: HCM Domain Lead
+    qa_owner: QA Performance Engineer
+    platform_owner: Platform SRE Lead
+    dataset: 10,000 Employees, 150 Departments
+    load_profile: 500 concurrent paginated searches
+    target: P95 < 150ms, Query Count O(1)
+    result: P95 = 84ms, Query Count = 2 (constant)
+    last_run: "2026-09-22T09:15:00Z"
+    status: PASSED
+
+  - test_id: perf-test-payroll-calculation
+    domain: Payroll & Compensation
+    primary_owner: Payroll Lead
+    qa_owner: QA Financial Systems Engineer
+    platform_owner: Platform SRE Lead
+    dataset: 5,000 Employee Payroll Run
+    load_profile: Full gross-to-net batch calculation
+    target: Duration < 60s, Zero Deadlocks
+    result: Duration = 24.2s, Zero Deadlocks
+    last_run: "2026-09-22T09:30:00Z"
+    status: PASSED
+
+  - test_id: perf-test-attendance-punch
+    domain: Workforce Management
+    primary_owner: Attendance Lead
+    qa_owner: QA Automation Engineer
+    platform_owner: Platform SRE Lead
+    dataset: 20,000 Punches / Hour
+    load_profile: Morning rush spike simulation (1,500 punches/min)
+    target: P95 < 100ms, Zero Dropped Punches
+    result: P95 = 42ms, Zero Dropped Punches
+    last_run: "2026-09-22T09:45:00Z"
+    status: PASSED
+
+  - test_id: perf-test-workflow-approvals
+    domain: Workflow Engine
+    primary_owner: Workflow Architect
+    qa_owner: QA Automation Engineer
+    platform_owner: Platform SRE Lead
+    dataset: 2,500 Active Workflows, 500 Approvers
+    load_profile: 300 concurrent approval transitions
+    target: P95 < 200ms, Zero Duplicate Steps
+    result: P95 = 96ms, Zero Duplicate Steps
+    last_run: "2026-09-22T10:00:00Z"
+    status: PASSED
+
+  - test_id: perf-test-noisy-neighbor
+    domain: Tenancy & Architecture
+    primary_owner: Core Architect
+    qa_owner: SRE Performance Engineer
+    platform_owner: Platform SRE Lead
+    dataset: Tenant A (50k emp), Tenant B (500 emp)
+    load_profile: Tenant A executes massive report export while Tenant B browses
+    target: Tenant B latency increase < 10%
+    result: Tenant B latency increase = 3.2%
+    last_run: "2026-09-22T10:15:00Z"
+    status: PASSED
+
+  - test_id: perf-test-soak-memory
+    domain: Platform Core & Queues
+    primary_owner: Platform SRE Lead
+    qa_owner: SRE Performance Engineer
+    platform_owner: Lead Architect
+    dataset: 100,000 Background Jobs over 6 Hours
+    load_profile: Continuous sustained job dispatch
+    target: Worker memory growth < 5% (zero leaks)
+    result: Worker memory stable (+0.8% over 6h)
+    last_run: "2026-09-22T10:30:00Z"
+    status: PASSED

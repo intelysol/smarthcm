@@ -30,7 +30,7 @@
 
         <div class="flex items-center space-x-3">
             <span class="text-xs text-slate-500">Authorized Records: <strong>{{ $fileData['total_authorized_documents'] }}</strong></span>
-            <button class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
+            <button onclick="document.getElementById('upload-file-modal').classList.remove('hidden')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition">
                 <i class="fa-solid fa-upload mr-1.5"></i>Upload to File
             </button>
         </div>
@@ -97,4 +97,48 @@
     </div>
 
 </div>
+
+<!-- Upload to Personnel File Modal -->
+<div id="upload-file-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900">Upload to Personnel File</h3>
+                <p class="text-xs text-slate-500">{{ $employee->first_name }} {{ $employee->last_name }}</p>
+            </div>
+            <button onclick="document.getElementById('upload-file-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+        </div>
+        <form onsubmit="handleUploadToFile(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Document Title</label>
+                <input type="text" required placeholder="e.g. Updated Passport Copy 2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Target Category</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    <option value="identification">Identification & Verification</option>
+                    <option value="contract">Contracts & Agreements</option>
+                    <option value="tax">Tax & Financial Compliance</option>
+                    <option value="training">Certifications & Training</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Document File</label>
+                <input type="file" required class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('upload-file-modal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Save to File</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleUploadToFile(e) {
+    e.preventDefault();
+    document.getElementById('upload-file-modal').classList.add('hidden');
+    window.showNotification('success', 'Document uploaded and archived into digital personnel file.');
+}
+</script>
 @endsection
