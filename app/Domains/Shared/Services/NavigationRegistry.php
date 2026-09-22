@@ -145,6 +145,12 @@ class NavigationRegistry
                 'route' => 'admin.data-lifecycle',
             ],
             [
+                'id' => 'admin.compliance-governance',
+                'label' => 'Compliance & Privacy Governance',
+                'icon' => 'fa-solid fa-shield-halved',
+                'route' => 'admin.compliance-governance',
+            ],
+            [
                 'id' => 'admin.settings',
                 'label' => 'Organization Settings',
                 'icon' => 'fa-solid fa-gears',
@@ -340,6 +346,12 @@ class NavigationRegistry
                 'icon' => 'fa-solid fa-address-book',
                 'route' => 'portal.directory',
             ],
+            [
+                'id' => 'employee.privacy',
+                'label' => 'Privacy & My Data Rights',
+                'icon' => 'fa-solid fa-user-shield',
+                'route' => 'portal.privacy',
+            ],
         ];
     }
 
@@ -453,6 +465,12 @@ class NavigationRegistry
                 'label' => 'Data Lifecycle & Retention',
                 'icon' => 'fa-solid fa-recycle',
                 'route' => 'operations.data-lifecycle',
+            ],
+            [
+                'id' => 'operations.compliance',
+                'label' => 'Compliance & Governance',
+                'icon' => 'fa-solid fa-scale-balanced',
+                'route' => 'operations.compliance',
             ],
             [
                 'id' => 'operations.billing',

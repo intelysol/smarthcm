@@ -211,4 +211,23 @@ class EmployeeExperienceWebController extends Controller
 
         return view('portal.employee.directory', compact('employee', 'people', 'isManager'));
     }
+
+    public function privacy(Request $request): View
+    {
+        $employee = $this->resolveEmployee($request);
+        $isManager = Employee::where('reporting_manager_id', $employee->id)->exists();
+        $user = $request->user();
+
+        $privacyRequests = [];
+        if ($user) {
+            $privacyRequests = \App\Domains\Compliance\Models\PrivacyRequest::where('tenant_id', $employee->tenant_id)
+                ->where('user_id', $user->id)
+                ->latest()
+                ->get();
+        }
+
+        $processingActivities = \App\Domains\Compliance\Models\PrivacyProcessingActivity::where('tenant_id', $employee->tenant_id)->get();
+
+        return view('portal.employee.privacy', compact('employee', 'privacyRequests', 'processingActivities', 'isManager'));
+    }
 }

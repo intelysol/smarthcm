@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Platform\Http\Controllers;
 
+use App\Domains\Compliance\Models\GovernanceControlTest;
+use App\Domains\Compliance\Models\GovernanceException;
+use App\Domains\Compliance\Models\GovernanceFinding;
+use App\Domains\Compliance\Models\GovernanceFramework;
+use App\Domains\Compliance\Services\EnterpriseGovernanceService;
+use App\Domains\Compliance\Services\EnterprisePrivacyService;
 use App\Domains\Operations\Models\OpsAlert;
 use App\Domains\Operations\Models\OpsAlertRule;
 use App\Domains\Operations\Models\OpsIncident;
@@ -30,7 +36,9 @@ class OperationalWorkspaceWebController extends Controller
         protected OperationalTelemetryService $telemetryService,
         protected DisasterRecoveryService $drService,
         protected PerformanceEngineeringService $perfService,
-        protected DataLifecycleService $lifecycleService
+        protected DataLifecycleService $lifecycleService,
+        protected EnterpriseGovernanceService $governanceService,
+        protected EnterprisePrivacyService $privacyService
     ) {}
 
     public function dashboard(Request $request): View
@@ -241,6 +249,33 @@ class OperationalWorkspaceWebController extends Controller
             'navigation',
             'telemetry',
             'dryRun'
+        ));
+    }
+
+    public function compliance(Request $request): View
+    {
+        $currentWorkspace = WorkspaceType::OPERATIONS;
+        $allowedWorkspaces = $this->workspaceManager->resolveAllowedWorkspaces($request->user());
+        $navigation = $this->navigationRegistry->getNavigationFor($currentWorkspace, $request->user());
+
+        $governanceScorecard = $this->governanceService->getGovernanceDashboardScorecard();
+        $privacyMetrics = $this->privacyService->getPrivacyDashboardMetrics();
+
+        $frameworks = GovernanceFramework::withCount('controls')->get();
+        $recentFindings = GovernanceFinding::latest()->take(5)->get();
+        $activeExceptions = GovernanceException::where('status', 'approved')->where('expires_at', '>', now())->get();
+        $recentTests = GovernanceControlTest::with('control')->latest()->take(5)->get();
+
+        return view('operations-workspace.compliance', compact(
+            'currentWorkspace',
+            'allowedWorkspaces',
+            'navigation',
+            'governanceScorecard',
+            'privacyMetrics',
+            'frameworks',
+            'recentFindings',
+            'activeExceptions',
+            'recentTests'
         ));
     }
 }

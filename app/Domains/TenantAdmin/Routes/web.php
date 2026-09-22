@@ -14,5 +14,6 @@ Route::middleware(['web', 'auth', 'workspace:tenant_admin'])->prefix('admin')->g
     Route::get('/workflows', [TenantAdminPortalWebController::class, 'workflows'])->name('admin.workflows');
     Route::get('/operations', [TenantAdminPortalWebController::class, 'operations'])->name('admin.operations');
     Route::get('/data-lifecycle', [TenantAdminPortalWebController::class, 'dataLifecycle'])->name('admin.data-lifecycle');
+    Route::get('/compliance-governance', [TenantAdminPortalWebController::class, 'complianceGovernance'])->name('admin.compliance-governance');
     Route::get('/settings', [TenantAdminPortalWebController::class, 'settings'])->name('admin.settings');
 });

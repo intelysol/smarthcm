@@ -80,6 +80,7 @@ Route::middleware(['web', 'auth', 'workspace:operations'])->prefix('operations')
     Route::get('/performance', [\App\Domains\Platform\Http\Controllers\OperationalWorkspaceWebController::class, 'performance'])->name('operations.performance');
     Route::get('/capacity', [\App\Domains\Platform\Http\Controllers\OperationalWorkspaceWebController::class, 'capacity'])->name('operations.capacity');
     Route::get('/data-lifecycle', [\App\Domains\Platform\Http\Controllers\OperationalWorkspaceWebController::class, 'dataLifecycle'])->name('operations.data-lifecycle');
+    Route::get('/compliance', [\App\Domains\Platform\Http\Controllers\OperationalWorkspaceWebController::class, 'compliance'])->name('operations.compliance');
     Route::get('/logs', [\App\Domains\Platform\Http\Controllers\OperationalWorkspaceWebController::class, 'logs'])->name('operations.logs');
 });
 

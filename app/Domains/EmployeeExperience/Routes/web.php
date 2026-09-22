@@ -15,6 +15,7 @@ Route::prefix('portal')->middleware(['web'])->group(function () {
     Route::get('/documents', [EmployeeExperienceWebController::class, 'documents'])->name('portal.documents');
     Route::get('/services', [EmployeeExperienceWebController::class, 'services'])->name('portal.services');
     Route::get('/directory', [EmployeeExperienceWebController::class, 'directory'])->name('portal.directory');
+    Route::get('/privacy', [EmployeeExperienceWebController::class, 'privacy'])->name('portal.privacy');
 
     // Manager Workbench Web Routes
     Route::prefix('manager')->group(function () {

@@ -212,6 +212,9 @@
                 <a href="{{ route('portal.directory') }}" class="px-3 py-1.5 rounded-md hover:text-white hover:bg-[#142A44] transition flex items-center {{ request()->routeIs('portal.directory') ? 'text-white bg-[#142A44] font-semibold border-b-2 border-[#C9A227]' : '' }}">
                     <i class="fa-solid fa-address-book mr-1.5"></i> My People
                 </a>
+                <a href="{{ route('portal.privacy') }}" class="px-3 py-1.5 rounded-md hover:text-white hover:bg-[#142A44] transition flex items-center {{ request()->routeIs('portal.privacy') ? 'text-white bg-[#142A44] font-semibold border-b-2 border-[#C9A227]' : '' }}">
+                    <i class="fa-solid fa-user-shield mr-1.5"></i> Privacy
+                </a>
             </nav>
         </div>
     </header>
@@ -305,6 +308,9 @@
                 </a>
                 <a href="{{ route('portal.directory') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-800 font-medium">
                     <i class="fa-solid fa-address-book w-6 text-[#1E3A5F]"></i> Employee Directory
+                </a>
+                <a href="{{ route('portal.privacy') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-800 font-medium">
+                    <i class="fa-solid fa-user-shield w-6 text-[#1E3A5F]"></i> Privacy & Data Rights
                 </a>
                 <a href="{{ route('portal.billing.index') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-800 font-medium">
                     <i class="fa-solid fa-receipt w-6 text-[#1E3A5F]"></i> Subscription & Billing

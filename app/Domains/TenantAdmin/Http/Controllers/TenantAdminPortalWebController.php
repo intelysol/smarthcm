@@ -12,6 +12,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Domains\Compliance\Models\GovernanceControl;
+use App\Domains\Compliance\Models\PrivacyProcessingActivity;
+use App\Domains\Compliance\Models\PrivacyRequest;
+use App\Domains\Compliance\Services\EnterpriseGovernanceService;
+use App\Domains\Compliance\Services\EnterprisePrivacyService;
 use App\Domains\Operations\Services\DataLifecycleService;
 use Illuminate\View\View;
 
@@ -20,7 +25,9 @@ class TenantAdminPortalWebController extends Controller
     public function __construct(
         protected WorkspaceManager $workspaceManager,
         protected NavigationRegistry $navigationRegistry,
-        protected DataLifecycleService $lifecycleService
+        protected DataLifecycleService $lifecycleService,
+        protected EnterpriseGovernanceService $governanceService,
+        protected EnterprisePrivacyService $privacyService
     ) {}
 
     protected function resolveTenant(Request $request): Tenant
@@ -195,6 +202,33 @@ class TenantAdminPortalWebController extends Controller
             'navigation',
             'telemetry',
             'effectivePolicy'
+        ));
+    }
+
+    public function complianceGovernance(Request $request): View
+    {
+        $tenant = $this->resolveTenant($request);
+        $currentWorkspace = WorkspaceType::TENANT_ADMIN;
+        $allowedWorkspaces = $this->workspaceManager->resolveAllowedWorkspaces($request->user());
+        $navigation = $this->navigationRegistry->getNavigationFor($currentWorkspace, $request->user());
+
+        $governanceScorecard = $this->governanceService->getGovernanceDashboardScorecard($tenant->id);
+        $privacyMetrics = $this->privacyService->getPrivacyDashboardMetrics($tenant->id);
+
+        $controls = GovernanceControl::where('tenant_id', $tenant->id)->orWhereNull('tenant_id')->with('framework')->get();
+        $activities = PrivacyProcessingActivity::where('tenant_id', $tenant->id)->get();
+        $privacyRequests = PrivacyRequest::where('tenant_id', $tenant->id)->latest()->take(10)->get();
+
+        return view('tenant-admin.compliance-governance', compact(
+            'tenant',
+            'currentWorkspace',
+            'allowedWorkspaces',
+            'navigation',
+            'governanceScorecard',
+            'privacyMetrics',
+            'controls',
+            'activities',
+            'privacyRequests'
         ));
     }
 }
