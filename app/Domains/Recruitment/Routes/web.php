@@ -10,7 +10,16 @@ Route::prefix('careers')->group(function (): void {
     Route::get('{slug}', [PublicCareersController::class, 'jobDetailWeb'])->name('careers.show');
 });
 
-// Authenticated Recruiter & ATS Dashboard
-Route::middleware(['web', 'auth'])->prefix('recruitment')->group(function (): void {
-    Route::get('/', [RecruitmentDashboardController::class, 'index'])->name('recruitment.dashboard');
+// Authenticated Recruiter & ATS Dashboard with Public Marketing Fallback
+Route::prefix('recruitment')->middleware(['web'])->group(function (): void {
+    Route::get('/', function (\Illuminate\Http\Request $request) {
+        if (auth()->check()) {
+            return app(\App\Domains\Recruitment\Http\Controllers\RecruitmentDashboardController::class)->index($request);
+        }
+        return app(\App\Domains\PublicWebsite\Http\Controllers\PublicWebsiteController::class)->feature($request, 'recruitment');
+    })->name('recruitment.public');
+
+    Route::middleware(['auth'])->group(function (): void {
+        Route::get('/dashboard', [RecruitmentDashboardController::class, 'index'])->name('recruitment.dashboard');
+    });
 });

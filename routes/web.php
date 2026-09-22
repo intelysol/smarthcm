@@ -2,9 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect('/portal');
-});
+require base_path('routes/public_web.php');
+
+// Platform Route: Public Marketing for Guests / Control Center for Platform Admins
+Route::get('/platform', function (\Illuminate\Http\Request $request) {
+    if (auth()->check() && (auth()->user()->is_super_admin ?? false)) {
+        return app(\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class)->index($request);
+    }
+    return app(\App\Domains\PublicWebsite\Http\Controllers\PublicWebsiteController::class)->platform($request);
+})->middleware('web')->name('platform.index');
 
 // Production Health Check & Operational Endpoints
 Route::get('/health', [\App\Domains\Platform\Http\Controllers\HealthCheckController::class, 'health']);
@@ -37,7 +43,6 @@ Route::middleware(['web', 'auth'])->prefix('workspace')->group(function () {
 
 // 1. Platform / Super Admin Control Center
 Route::middleware(['web', 'auth', 'workspace:platform'])->prefix('platform')->group(function () {
-    Route::get('/', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'index'])->name('platform.index');
     Route::get('/control-center', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'index'])->name('platform.control-center');
     Route::get('/tenants', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'tenants'])->name('platform.tenants');
     Route::get('/users', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'users'])->name('platform.users');

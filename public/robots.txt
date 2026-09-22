@@ -1,2 +1,13 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /app
+Disallow: /admin
+Disallow: /hr
+Disallow: /manager
+Disallow: /employee
+Disallow: /executive
+Disallow: /operations
+Disallow: /portal
+Disallow: /storage/
+
+Sitemap: http://localhost:8000/sitemap.xml
