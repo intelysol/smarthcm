@@ -11,18 +11,20 @@ class EmployeeQuickActionService
     {
         $tenantId = $employee->tenant_id;
 
-        $customActions = HcmEmployeeQuickAction::where('tenant_id', $tenantId)
-            ->where('is_active', true)
-            ->orderBy('display_order')
-            ->get();
+        if (\Illuminate\Support\Facades\Schema::hasTable('hcm_employee_quick_actions')) {
+            $customActions = HcmEmployeeQuickAction::where('tenant_id', $tenantId)
+                ->where('is_active', true)
+                ->orderBy('display_order')
+                ->get();
 
-        if ($customActions->isNotEmpty()) {
-            return $customActions->map(fn ($action) => [
-                'key' => $action->key,
-                'title' => $action->title,
-                'icon' => $action->icon,
-                'route' => $action->route,
-            ])->toArray();
+            if ($customActions->isNotEmpty()) {
+                return $customActions->map(fn ($action) => [
+                    'key' => $action->key,
+                    'title' => $action->title,
+                    'icon' => $action->icon,
+                    'route' => $action->route,
+                ])->toArray();
+            }
         }
 
         // Standard Default Actions

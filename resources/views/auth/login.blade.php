@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In &bull; Enterprise Platform</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -57,7 +59,7 @@
 
         <!-- Login Card -->
         <div class="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-8">
-            <form method="POST" action="{{ route('login.submit') }}" class="space-y-5">
+            <form id="login-form" method="POST" action="{{ route('login.submit') }}" class="space-y-5">
                 @csrf
 
                 <div>
@@ -112,7 +114,7 @@
             @if(!app()->isProduction())
             <!-- Development & Demo Quick-Login Picker -->
             <div class="mt-6 pt-5 border-t border-slate-100">
-                <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center">
                         <svg class="w-3.5 h-3.5 mr-1 text-[#C9A227]" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
@@ -121,46 +123,57 @@
                     </span>
                     <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">dev-only</span>
                 </div>
+                <p class="text-[11px] text-slate-500 mb-2.5">
+                    Click any persona to auto-sign in. Universal password: <code class="bg-amber-50 text-amber-900 border border-amber-200 px-1.5 py-0.5 rounded font-mono font-semibold">Demo1234!@#$</code>
+                </p>
                 <div class="grid grid-cols-1 gap-1.5 text-xs">
-                    <button type="button" onclick="fillCreds('superadmin@example.test', 'Demo1234!@#$')" class="text-left px-3 py-1.5 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
+                    <button type="button" onclick="loginAs('superadmin@example.test', 'Demo1234!@#$')" class="text-left px-3 py-2 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
                         <div>
                             <span class="font-bold text-slate-800 group-hover:text-[#1E3A5F]">Platform Super Admin</span>
                             <span class="text-[11px] text-slate-500 font-mono block">superadmin@example.test</span>
                         </div>
-                        <span class="text-[10px] font-semibold text-slate-400 group-hover:text-[#C9A227]">&rarr;</span>
+                        <span class="text-[11px] font-semibold text-slate-500 group-hover:text-[#C9A227] flex items-center">Sign in &rarr;</span>
                     </button>
-                    <button type="button" onclick="fillCreds('admin@example.test', 'Demo1234!@#$')" class="text-left px-3 py-1.5 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
+                    <button type="button" onclick="loginAs('admin@example.test', 'Demo1234!@#$')" class="text-left px-3 py-2 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
                         <div>
                             <span class="font-bold text-slate-800 group-hover:text-[#1E3A5F]">Tenant Admin</span>
                             <span class="text-[11px] text-slate-500 font-mono block">admin@example.test</span>
                         </div>
-                        <span class="text-[10px] font-semibold text-slate-400 group-hover:text-[#C9A227]">&rarr;</span>
+                        <span class="text-[11px] font-semibold text-slate-500 group-hover:text-[#C9A227] flex items-center">Sign in &rarr;</span>
                     </button>
-                    <button type="button" onclick="fillCreds('hr@example.test', 'Demo1234!@#$')" class="text-left px-3 py-1.5 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
+                    <button type="button" onclick="loginAs('hr@example.test', 'Demo1234!@#$')" class="text-left px-3 py-2 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
                         <div>
                             <span class="font-bold text-slate-800 group-hover:text-[#1E3A5F]">HR Administrator</span>
                             <span class="text-[11px] text-slate-500 font-mono block">hr@example.test</span>
                         </div>
-                        <span class="text-[10px] font-semibold text-slate-400 group-hover:text-[#C9A227]">&rarr;</span>
+                        <span class="text-[11px] font-semibold text-slate-500 group-hover:text-[#C9A227] flex items-center">Sign in &rarr;</span>
                     </button>
-                    <button type="button" onclick="fillCreds('manager@example.test', 'Demo1234!@#$')" class="text-left px-3 py-1.5 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
+                    <button type="button" onclick="loginAs('manager@example.test', 'Demo1234!@#$')" class="text-left px-3 py-2 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
                         <div>
                             <span class="font-bold text-slate-800 group-hover:text-[#1E3A5F]">People Manager</span>
                             <span class="text-[11px] text-slate-500 font-mono block">manager@example.test</span>
                         </div>
-                        <span class="text-[10px] font-semibold text-slate-400 group-hover:text-[#C9A227]">&rarr;</span>
+                        <span class="text-[11px] font-semibold text-slate-500 group-hover:text-[#C9A227] flex items-center">Sign in &rarr;</span>
                     </button>
-                    <button type="button" onclick="fillCreds('employee@example.test', 'Demo1234!@#$')" class="text-left px-3 py-1.5 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
+                    <button type="button" onclick="loginAs('employee@example.test', 'Demo1234!@#$')" class="text-left px-3 py-2 rounded-lg border border-slate-200 hover:border-[#1E3A5F] hover:bg-slate-50 transition flex items-center justify-between group">
                         <div>
                             <span class="font-bold text-slate-800 group-hover:text-[#1E3A5F]">Employee (Alex Chen)</span>
                             <span class="text-[11px] text-slate-500 font-mono block">employee@example.test</span>
                         </div>
-                        <span class="text-[10px] font-semibold text-slate-400 group-hover:text-[#C9A227]">&rarr;</span>
+                        <span class="text-[11px] font-semibold text-slate-500 group-hover:text-[#C9A227] flex items-center">Sign in &rarr;</span>
                     </button>
                 </div>
             </div>
 
             <script>
+                function loginAs(email, password) {
+                    document.getElementById('email').value = email;
+                    document.getElementById('password').value = password;
+                    const form = document.getElementById('login-form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
                 function fillCreds(email, password) {
                     document.getElementById('email').value = email;
                     document.getElementById('password').value = password;

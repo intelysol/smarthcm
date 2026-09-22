@@ -52,5 +52,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(OrganizationMasterDataSeeder::class);
+        $this->call(DemoEnvironmentSeeder::class);
     }
 }

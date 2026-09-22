@@ -400,8 +400,10 @@ class ManagerWorkbenchService
         return Employee::where('tenant_id', $manager->tenant_id)
             ->where(function ($q) use ($manager) {
                 $q->where('reporting_manager_id', $manager->id)
-                  ->orWhere('current_manager_employee_id', $manager->id)
-                  ->orWhere('reports_to_id', $manager->id);
+                  ->orWhere('current_manager_employee_id', $manager->id);
+                if (Schema::hasColumn('employees', 'reports_to_id')) {
+                    $q->orWhere('reports_to_id', $manager->id);
+                }
             })
             ->with(['department', 'designation', 'workLocation']);
     }
