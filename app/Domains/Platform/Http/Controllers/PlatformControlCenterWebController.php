@@ -9,6 +9,8 @@ use App\Domains\Shared\Models\Tenant;
 use App\Domains\Shared\Services\NavigationRegistry;
 use App\Domains\Shared\Services\WorkspaceManager;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -105,5 +107,30 @@ class PlatformControlCenterWebController extends Controller
         $navigation = $this->navigationRegistry->getNavigationFor($currentWorkspace, $request->user());
 
         return view('platform.settings', compact('currentWorkspace', 'allowedWorkspaces', 'navigation'));
+    }
+
+    public function users(Request $request): View
+    {
+        $users = User::with(['tenant', 'roles'])->paginate(20);
+
+        $currentWorkspace = WorkspaceType::PLATFORM_ADMIN;
+        $allowedWorkspaces = $this->workspaceManager->resolveAllowedWorkspaces($request->user());
+        $navigation = $this->navigationRegistry->getNavigationFor($currentWorkspace, $request->user());
+
+        return view('platform.users', compact('users', 'currentWorkspace', 'allowedWorkspaces', 'navigation'));
+    }
+
+    public function togglePlatformUserStatus(Request $request, string $userId): RedirectResponse
+    {
+        $user = User::findOrFail($userId);
+
+        if ($request->user() && (string) $request->user()->id === (string) $user->id) {
+            return redirect()->route('platform.users')->with('warning', 'You cannot deactivate your own Super Admin account.');
+        }
+
+        $newStatus = ($user->status === 'active') ? 'suspended' : 'active';
+        $user->update(['status' => $newStatus]);
+
+        return redirect()->route('platform.users')->with('status', "User {$user->name} ({$user->email}) status updated to " . strtoupper($newStatus) . ".");
     }
 }

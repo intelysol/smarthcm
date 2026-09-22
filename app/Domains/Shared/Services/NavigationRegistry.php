@@ -76,10 +76,22 @@ class NavigationRegistry
                 'route' => 'platform.ai-governance',
             ],
             [
+                'id' => 'platform.users',
+                'label' => 'Platform Users & Admins',
+                'icon' => 'fa-solid fa-user-shield',
+                'route' => 'platform.users',
+            ],
+            [
                 'id' => 'platform.settings',
                 'label' => 'Platform Settings',
                 'icon' => 'fa-solid fa-sliders',
                 'route' => 'platform.settings',
+            ],
+            [
+                'id' => 'platform.help',
+                'label' => 'Help & Documentation',
+                'icon' => 'fa-solid fa-circle-question',
+                'route' => 'help.index',
             ],
         ];
     }
@@ -155,6 +167,12 @@ class NavigationRegistry
                 'label' => 'Organization Settings',
                 'icon' => 'fa-solid fa-gears',
                 'route' => 'admin.settings',
+            ],
+            [
+                'id' => 'admin.help',
+                'label' => 'Help & Documentation',
+                'icon' => 'fa-solid fa-circle-question',
+                'route' => 'help.index',
             ],
         ];
     }
@@ -237,6 +255,12 @@ class NavigationRegistry
                 'icon' => 'fa-solid fa-chart-pie',
                 'route' => 'analytics.workforce.metrics',
             ],
+            [
+                'id' => 'hr.help',
+                'label' => 'Help & Guides',
+                'icon' => 'fa-solid fa-circle-question',
+                'route' => 'help.index',
+            ],
         ];
     }
 
@@ -282,6 +306,12 @@ class NavigationRegistry
                 'label' => 'Team Analytics',
                 'icon' => 'fa-solid fa-chart-simple',
                 'route' => 'manager.analytics',
+            ],
+            [
+                'id' => 'manager.help',
+                'label' => 'Help & Guides',
+                'icon' => 'fa-solid fa-circle-question',
+                'route' => 'help.index',
             ],
         ];
     }
@@ -351,6 +381,12 @@ class NavigationRegistry
                 'label' => 'Privacy & My Data Rights',
                 'icon' => 'fa-solid fa-user-shield',
                 'route' => 'portal.privacy',
+            ],
+            [
+                'id' => 'employee.help',
+                'label' => 'Help & Knowledge Base',
+                'icon' => 'fa-solid fa-circle-question',
+                'route' => 'help.index',
             ],
         ];
     }
@@ -489,6 +525,12 @@ class NavigationRegistry
                 'label' => 'Operational Logs & Telemetry',
                 'icon' => 'fa-solid fa-terminal',
                 'route' => 'operations.logs',
+            ],
+            [
+                'id' => 'operations.help',
+                'label' => 'Help & Runbooks',
+                'icon' => 'fa-solid fa-circle-question',
+                'route' => 'help.index',
             ],
         ];
     }

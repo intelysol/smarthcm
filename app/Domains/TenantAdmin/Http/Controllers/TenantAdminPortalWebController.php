@@ -18,6 +18,10 @@ use App\Domains\Compliance\Models\PrivacyRequest;
 use App\Domains\Compliance\Services\EnterpriseGovernanceService;
 use App\Domains\Compliance\Services\EnterprisePrivacyService;
 use App\Domains\Operations\Services\DataLifecycleService;
+use App\Domains\Platform\Models\Role;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class TenantAdminPortalWebController extends Controller
@@ -118,13 +122,87 @@ class TenantAdminPortalWebController extends Controller
     public function users(Request $request): View
     {
         $tenant = $this->resolveTenant($request);
-        $users = DB::table('users')->where('tenant_id', $tenant->id)->paginate(15);
+        $users = User::with('roles')->where('tenant_id', $tenant->id)->paginate(15);
+        $roles = Role::where(fn ($q) => $q->where('tenant_id', $tenant->id)->orWhere('type', 'system'))->get();
 
         $currentWorkspace = WorkspaceType::TENANT_ADMIN;
         $allowedWorkspaces = $this->workspaceManager->resolveAllowedWorkspaces($request->user());
         $navigation = $this->navigationRegistry->getNavigationFor($currentWorkspace, $request->user());
 
-        return view('tenant-admin.users', compact('tenant', 'users', 'currentWorkspace', 'allowedWorkspaces', 'navigation'));
+        return view('tenant-admin.users', compact('tenant', 'users', 'roles', 'currentWorkspace', 'allowedWorkspaces', 'navigation'));
+    }
+
+    public function createUser(Request $request): RedirectResponse
+    {
+        $tenant = $this->resolveTenant($request);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'role_id' => ['nullable', 'string'],
+            'role' => ['nullable', 'string'],
+            'password' => ['nullable', 'string', 'min:8'],
+            'status' => ['nullable', 'string'],
+        ]);
+
+        $defaultPassword = $validated['password'] ?? env('DEMO_USER_PASSWORD', 'Demo1234!@#$');
+
+        $user = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($defaultPassword),
+            'status' => $validated['status'] ?? 'active',
+            'is_platform_admin' => false,
+        ]);
+
+        if (!empty($validated['role_id'])) {
+            $user->roles()->syncWithoutDetaching([$validated['role_id'] => ['assigned_by' => $request->user()?->id]]);
+        } elseif (!empty($validated['role'])) {
+            $roleObj = Role::where(function ($q) use ($tenant) {
+                $q->where('tenant_id', $tenant->id)->orWhere('type', 'system');
+            })->where('name', $validated['role'])->first();
+            if ($roleObj) {
+                $user->roles()->syncWithoutDetaching([$roleObj->id => ['assigned_by' => $request->user()?->id]]);
+            }
+        }
+
+        return redirect()->route('admin.users')
+            ->with('status', "User {$user->name} created successfully.")
+            ->with('success', "User {$user->name} created successfully.");
+    }
+
+    public function toggleUserStatus(Request $request, string $userId): RedirectResponse
+    {
+        $tenant = $this->resolveTenant($request);
+        $user = User::where('tenant_id', $tenant->id)->findOrFail($userId);
+
+        if ($request->user() && (string) $request->user()->id === (string) $user->id) {
+            return redirect()->route('admin.users')->with('warning', 'You cannot deactivate your own account.');
+        }
+
+        $newStatus = ($user->status === 'active') ? 'inactive' : 'active';
+        $user->update(['status' => $newStatus]);
+
+        return redirect()->route('admin.users')
+            ->with('status', "User {$user->name} status changed to " . strtoupper($newStatus) . ".")
+            ->with('success', "User {$user->name} status changed to " . strtoupper($newStatus) . ".");
+    }
+
+    public function resetUserPassword(Request $request, string $userId): RedirectResponse
+    {
+        $tenant = $this->resolveTenant($request);
+        $user = User::where('tenant_id', $tenant->id)->findOrFail($userId);
+
+        $newPassword = $request->input('password') ?: env('DEMO_USER_PASSWORD', 'Demo1234!@#$');
+        $user->update([
+            'password' => Hash::make($newPassword),
+            'must_change_password' => true,
+        ]);
+
+        return redirect()->route('admin.users')
+            ->with('status', "Password for {$user->email} has been reset successfully.")
+            ->with('success', "Password for {$user->email} has been reset successfully.");
     }
 
     public function workflows(Request $request): View

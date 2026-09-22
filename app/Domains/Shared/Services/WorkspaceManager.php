@@ -139,23 +139,27 @@ class WorkspaceManager
      */
     protected function hasRoleLike(User $user, array $roleNames): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        foreach ($roleNames as $role) {
-            foreach ($userRoles as $userRole) {
-                if (str_contains(strtolower($userRole), strtolower($role))) {
-                    return true;
-                }
+        $userRoles = array_map(fn ($r) => str_replace(['-', ' '], '_', strtolower((string) $r)), $user->roles()->pluck('name')->toArray());
+        $normalizedTargets = array_map(fn ($r) => str_replace(['-', ' '], '_', strtolower($r)), $roleNames);
+
+        foreach ($normalizedTargets as $target) {
+            if (in_array($target, $userRoles, true)) {
+                return true;
             }
         }
 
         // Also check role placeholder or email/name heuristics in development
-        if (str_contains(strtolower($user->email ?? ''), 'admin') && (in_array('admin', $roleNames) || in_array('platform_admin', $roleNames) || in_array('tenant_admin', $roleNames))) {
+        $email = strtolower($user->email ?? '');
+        if (str_contains($email, 'superadmin') && (in_array('platform_admin', $normalizedTargets, true) || in_array('super_admin', $normalizedTargets, true))) {
             return true;
         }
-        if (str_contains(strtolower($user->email ?? ''), 'hr') && in_array('hr_admin', $roleNames)) {
+        if (str_contains($email, 'admin') && !str_contains($email, 'superadmin') && !str_contains($email, 'hr') && (in_array('admin', $normalizedTargets, true) || in_array('tenant_admin', $normalizedTargets, true))) {
             return true;
         }
-        if (str_contains(strtolower($user->email ?? ''), 'manager') && in_array('manager', $roleNames)) {
+        if (str_contains($email, 'hr') && in_array('hr_admin', $normalizedTargets, true)) {
+            return true;
+        }
+        if (str_contains($email, 'manager') && in_array('manager', $normalizedTargets, true)) {
             return true;
         }
 

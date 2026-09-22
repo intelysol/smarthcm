@@ -1,62 +1,121 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Flow Enterprise Platform (Smart HCM)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Enterprise-Grade Human Capital Management, Multi-Tenant SaaS, and Business Operations Platform**
 
-## Flow Enterprise Platform
+The **Flow Enterprise Platform (FEP)** is an enterprise application platform evolved from Smart HCM. It combines modular HCM domains (workforce, time & attendance, payroll, benefits, performance, recruitment) with high-availability cloud architecture: multi-tenant data isolation, observability, automated disaster recovery, RBAC access control, data lifecycle management, compliance governance, and an in-app documentation center.
 
-This repository is evolving from an HCM implementation into the application-neutral Flow Enterprise Platform (FEP). The mandatory [Master Development Constitution](docs/architecture/master-development-constitution.md) governs all development, the [AI Development Operating System](docs/architecture/ai-development-operating-system.md) governs AI changes, and the [FEP architecture contract](docs/architecture/flow-enterprise-platform.md) provides incremental adoption rules.
+---
 
-## About Laravel
+## ⚡ Quick Start (5 Minutes)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Prerequisites
+- **PHP**: 8.2+ (PHP 8.3 recommended)
+- **Composer**: 2.x
+- **MySQL / MariaDB**: MySQL 8.0+ or MariaDB 10.5+
+- **Redis**: 6.0+ (Queues, Caching, Sessions)
+- **Node.js**: 18+ (Node 20 LTS recommended)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+### 2. Installation & Setup
 ```bash
-composer require laravel/boost --dev
+# Clone the repository
+git clone https://github.com/intelysol/smarthcm.git
+cd smarthcm
 
-php artisan boost:install
+# Install PHP and Node dependencies
+composer install
+npm install && npm run build
+
+# Configure environment
+cp .env.example .env
+php artisan key:generate
+
+# Run database migrations
+php artisan migrate
+
+# Seed the demo environment & 5 personas
+php artisan app:setup-demo
+
+# Start the application server
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Navigate to `http://localhost:8000` to access the login portal.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 👥 Demo Personas & Credentials
 
-## Code of Conduct
+The platform includes 5 pre-configured demo personas ready for immediate end-to-end evaluation:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Persona | Role | Email | Password | Initial Redirect Destination |
+| :--- | :--- | :--- | :--- | :--- |
+| **Platform Super Admin** | Platform Super Admin | `superadmin@example.test` | `Demo1234!@#$` | `/platform` (Global SaaS Control Plane) |
+| **Tenant Admin** | Tenant Administrator | `admin@example.test` | `Demo1234!@#$` | `/admin/dashboard` (Organization Management) |
+| **HR Administrator** | HR Director | `hr@example.test` | `Demo1234!@#$` | `/hr/dashboard` (HCM Operations Center) |
+| **People Manager** | Engineering Manager | `manager@example.test` | `Demo1234!@#$` | `/manager/workbench` (Team Management) |
+| **Employee** | Senior Software Engineer | `employee@example.test` | `Demo1234!@#$` | `/portal` (Self-Service Portal) |
 
-## Security Vulnerabilities
+> [!NOTE]
+> In local and staging environments, the `/login` page features **one-click demo login buttons** for instant role switching.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+To customize the default password for seeded accounts, set `DEMO_USER_PASSWORD` in your `.env` file before executing `php artisan app:setup-demo`.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🛡️ Production Safety Safeguards
+
+The platform is engineered with strict production defenses:
+- **Seeding Guard**: `DemoEnvironmentSeeder` automatically halts and throws an exception if `APP_ENV=production` unless `SEED_DEMO_USERS=true` is explicitly configured.
+- **Reset Guard**: The `php artisan app:reset-demo` command is permanently locked in production environments.
+- **Tenant Isolation**: Eloquent global scopes and middleware strictly enforce tenant boundaries (`WHERE tenant_id = ?`) across all queries.
+
+---
+
+## 🛠️ Essential Artisan Commands
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan app:setup-demo` | Seeds or updates the demo tenant, company, departments, positions, and 5 demo accounts. |
+| `php artisan app:reset-demo --force` | Completely flushes and re-seeds the demo environment (dev/staging only). |
+| `php artisan horizon` | Starts the Redis queue monitoring workers and dashboard. |
+| `php artisan app:health:check` | Executes platform health checks across DB, Redis, Horizon, and Storage. |
+
+---
+
+## 📚 Documentation & Guides
+
+Comprehensive documentation is available both directly in markdown files and within the interactive in-app Help Center at `/help`:
+
+### Getting Started
+- [Installation & Environment Setup](docs/getting-started/installation.md)
+- [5-Minute Quick Start Guide](docs/getting-started/quick-start.md)
+- [Demo Accounts & Credentials](docs/getting-started/demo-accounts.md)
+
+### Administration & Operations
+- [Platform Super Admin Guide](docs/administration/super-admin-guide.md)
+- [Tenant Administrator Guide](docs/administration/tenant-admin-guide.md)
+- [User Management Architecture](docs/administration/user-management.md)
+- [Roles & Permissions (RBAC)](docs/administration/roles-and-permissions.md)
+- [Tenant Management & Isolation](docs/administration/tenant-management.md)
+
+### HCM & Workforce Workspaces
+- [HR Administrator Guide](docs/hcm/hr-admin-guide.md)
+- [People Manager Guide](docs/hcm/manager-guide.md)
+- [Employee Self-Service Guide](docs/hcm/employee-guide.md)
+
+### Help, FAQ & Diagnostics
+- [Frequently Asked Questions (FAQ)](docs/help/faq.md)
+- [Troubleshooting & Diagnostics](docs/help/troubleshooting.md)
+- [Epic 2.80 Specification](docs/epics/EPIC_2_80_ADMIN_ACCESS_AND_HELP.md)
+
+---
+
+## 🏛️ Architecture & Governance
+
+The mandatory [Master Development Constitution](docs/architecture/master-development-constitution.md) governs all architectural boundaries, and the [FEP Architecture Contract](docs/architecture/flow-enterprise-platform.md) establishes rules for core platform extensions.
+
+---
+
+## 📄 License
+
+The Flow Enterprise Platform is open-source software licensed under the [MIT License](LICENSE).

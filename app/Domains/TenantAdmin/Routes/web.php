@@ -11,6 +11,9 @@ Route::middleware(['web', 'auth', 'workspace:tenant_admin'])->prefix('admin')->g
     Route::get('/departments', [TenantAdminPortalWebController::class, 'departments'])->name('admin.departments');
     Route::get('/positions', [TenantAdminPortalWebController::class, 'positions'])->name('admin.positions');
     Route::get('/users', [TenantAdminPortalWebController::class, 'users'])->name('admin.users');
+    Route::post('/users', [TenantAdminPortalWebController::class, 'createUser'])->name('admin.users.create');
+    Route::post('/users/{user}/status', [TenantAdminPortalWebController::class, 'toggleUserStatus'])->name('admin.users.status');
+    Route::post('/users/{user}/reset-password', [TenantAdminPortalWebController::class, 'resetUserPassword'])->name('admin.users.reset-password');
     Route::get('/workflows', [TenantAdminPortalWebController::class, 'workflows'])->name('admin.workflows');
     Route::get('/operations', [TenantAdminPortalWebController::class, 'operations'])->name('admin.operations');
     Route::get('/data-lifecycle', [TenantAdminPortalWebController::class, 'dataLifecycle'])->name('admin.data-lifecycle');

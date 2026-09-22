@@ -17,10 +17,17 @@ Route::get('/operations/system-health', [\App\Domains\Platform\Http\Controllers\
 // Authentication & Dashboard Routes
 Route::get('/login', [\App\Domains\Platform\Http\Controllers\LoginWebController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [\App\Domains\Platform\Http\Controllers\LoginWebController::class, 'login'])->name('login.submit');
-Route::post('/logout', [\App\Domains\Platform\Http\Controllers\LoginWebController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [\App\Domains\Platform\Http\Controllers\LoginWebController::class, 'logout'])->name('logout');
 Route::get('/dashboard', function () {
     return redirect('/portal');
 })->name('dashboard');
+
+// Application Help & Documentation Center
+Route::middleware(['web'])->prefix('help')->group(function () {
+    Route::get('/', [\App\Domains\Shared\Http\Controllers\HelpWebController::class, 'index'])->name('help.index');
+    Route::get('/category/{category}', [\App\Domains\Shared\Http\Controllers\HelpWebController::class, 'category'])->name('help.category');
+    Route::get('/article/{slug}', [\App\Domains\Shared\Http\Controllers\HelpWebController::class, 'show'])->name('help.show');
+});
 
 // Workspace Context & Switching
 Route::middleware(['web', 'auth'])->prefix('workspace')->group(function () {
@@ -33,6 +40,8 @@ Route::middleware(['web', 'auth', 'workspace:platform'])->prefix('platform')->gr
     Route::get('/', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'index'])->name('platform.index');
     Route::get('/control-center', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'index'])->name('platform.control-center');
     Route::get('/tenants', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'tenants'])->name('platform.tenants');
+    Route::get('/users', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'users'])->name('platform.users');
+    Route::post('/users/{user}/status', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'togglePlatformUserStatus'])->name('platform.users.status');
     Route::get('/billing', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'billing'])->name('platform.billing');
     Route::get('/integrations', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'index'])->name('platform.integrations');
     Route::get('/security', [\App\Domains\Platform\Http\Controllers\PlatformControlCenterWebController::class, 'security'])->name('platform.security');
