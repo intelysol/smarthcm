@@ -139,4 +139,20 @@ class PublicWebsiteRoutesTest extends TestCase
         $response->assertSee('SmartHCM Workforce Intelligence Team');
         $response->assertSee('Published:');
     }
+
+    /**
+     * Test marketing layout includes favicons and security headers allow tailwind CDN.
+     */
+    public function test_marketing_layout_includes_favicons_and_security_headers_allow_tailwind_cdn(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertSee('favicon.svg');
+        $response->assertSee('favicon.ico');
+
+        $csp = $response->headers->get('Content-Security-Policy');
+        $this->assertNotNull($csp);
+        $this->assertStringContainsString('https://cdn.tailwindcss.com', $csp);
+    }
 }
+
